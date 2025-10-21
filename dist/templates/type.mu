@@ -25,9 +25,9 @@ export const api = createApi({
 {{#collections}}
 export type {{singularUpperCase}} = {
   id: string;
-  {{#properties}}
+  {{#fields}}
   {{name}}: {{&parsedType}};
-  {{/properties}}
+  {{/fields}}
   created: Date;
   updated: Date;
   {{#includeExpand}}
@@ -41,9 +41,9 @@ export type {{singularUpperCase}} = {
 
 export type Serialized{{singularUpperCase}} = {
   id: string;
-  {{#properties}}
+  {{#fields}}
   {{name}}: {{&serializedType}};
-  {{/properties}}
+  {{/fields}}
   created: string;
   updated: string;
   {{#includeExpand}}
@@ -56,29 +56,29 @@ export type Serialized{{singularUpperCase}} = {
 };
 
 export type Create{{singularUpperCase}} = {
-  {{#properties}}
+  {{#fields}}
   {{name}}: {{&parsedType}};
-  {{/properties}}
+  {{/fields}}
 };
 
 export type SerializedCreate{{singularUpperCase}} = {
-  {{#properties}}
+  {{#fields}}
   {{name}}: {{&serializedType}};
-  {{/properties}}
+  {{/fields}}
 };
 
 export type Update{{singularUpperCase}} = {
   id: string;
-  {{#properties}}
+  {{#fields}}
   {{name}}: {{&parsedType}};
-  {{/properties}}
+  {{/fields}}
 };
 
 export type SerializedUpdate{{singularUpperCase}} = {
   id: string;
-  {{#properties}}
+  {{#fields}}
   {{name}}: {{&serializedType}};
-  {{/properties}}
+  {{/fields}}
 };
 
 export type {{singularUpperCase}}Expand = {
@@ -91,7 +91,7 @@ export type {{singularUpperCase}}Expand = {
 };
 
 export type {{singularUpperCase}}CommonOptions = {
-  fields?: Array<"id"|{{#properties}}"{{name}}"|{{/properties}}"created"|"updated">;
+  fields?: Array<"id"|{{#fields}}"{{name}}"|{{/fields}}"created"|"updated">;
 };
 
 export type {{singularUpperCase}}ListOptions = {{singularUpperCase}}CommonOptions & {
@@ -128,11 +128,11 @@ export type {{singularUpperCase}}RecordFullListOptions =
 export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase}}): {{singularUpperCase}} {
   return {
     ...record,
-    {{#properties}}
+    {{#fields}}
     {{#parser}}
     {{name}}: {{parser}},
     {{/parser}}
-    {{/properties}}
+    {{/fields}}
     created: parseISO(record.created),
     updated: parseISO(record.updated),
     {{#includeExpand}}
@@ -151,11 +151,11 @@ export function serialize{{singularUpperCase}}(record: Update{{singularUpperCase
 export function serialize{{singularUpperCase}}(record: {{singularUpperCase}} | Create{{singularUpperCase}} | Update{{singularUpperCase}}): Serialized{{singularUpperCase}} | SerializedCreate{{singularUpperCase}} | SerializedUpdate{{singularUpperCase}} {
   return {
     ...record,
-    {{#properties}}
+    {{#fields}}
     {{#serializer}}
     {{name}}: {{serializer}},
     {{/serializer}}
-    {{/properties}}
+    {{/fields}}
     created: "created" in record ? formatISO(record.created) : undefined,
     updated: "updated" in record ? formatISO(record.updated) : undefined,
   };
