@@ -1,0 +1,29 @@
+{
+  "name": "rtkq-pb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "npx nodemon --exec \"npx tsc && cp -rf src/templates/* dist/templates && node dist/index.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "mustache": "^4.2.0",
+    "typescript": "^5.9.3",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@reduxjs/toolkit": "^2.9.0",
+    "@types/mustache": "^4.2.6",
+    "@types/node": "^24.7.2",
+    "date-fns": "^4.1.0",
+    "nodemon": "^3.1.10",
+    "pocketbase": "^0.26.2",
+    "react": "^19.2.0",
+    "tsx": "^4.20.6"
+  }
+}

@@ -1,0 +1,58 @@
+collections:
+  - name: "drivers"
+    singular: "driver"
+    plural: "drivers"
+    properties:
+      - name: "fullName"
+        type: "plainText"
+
+      - name: "email"
+        type: "plainText"
+
+      # - name: "avatar"
+      #   type: "file"
+
+      - name: "deleted"
+        type: "datetime"
+
+  - name: "cnhs"
+    singular: "cnh"
+    plural: "cnhs"
+    properties:
+      - name: "driver"
+        type: "relation"
+        to: "drivers"
+        mode: "multiple"
+      
+      - name: "number"
+        type: "plainText"
+
+      - name: "categories"
+        type: "select"
+        mode: "multiple"
+        options:
+          - "acc"
+          - "a"
+          - "b"
+          - "c"
+          - "d"
+          - "e"
+
+  - name: "test"
+    singular: "test"
+    plural: "tests"
+    properties:
+      - name: "json"
+        type: "json"
+
+  # - name: "vehicles"
+  #   singular: "vehicle"
+  #   plural: "vehicles"
+  #   properties:
+  #     - name: "plate"
+  #       type: "string"
+  #     - name: "model"
+  #       type: "string"
+  #     - name: "driver"
+  #       type: "relation"
+  #       to:   "drivers"

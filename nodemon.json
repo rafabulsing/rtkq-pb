@@ -1,0 +1,9 @@
+{
+  "verbose": true,
+  "ignore": ["dist, out.ts"],
+  "watch": [
+    "src/",
+    "schema.yaml"
+  ],
+  "ext": "ts,js,yaml,mu"
+}
