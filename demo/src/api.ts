@@ -77,7 +77,7 @@ export type DriverExpand = {
 };
 
 export type DriverCommonOptions = {
-  fields?: Array<"id"|"fullName"|"email"|"avatar"|"deleted"|"created"|"updated">;
+  fields?: Array<"id"|"fullName"|"email"|"avatar"|"deleted"|"created"|"updated"|"created"|"updated">;
 };
 
 export type DriverListOptions = DriverCommonOptions & {
@@ -333,7 +333,7 @@ export type CnhExpand = {
 };
 
 export type CnhCommonOptions = {
-  fields?: Array<"id"|"driver"|"number"|"categories"|"created"|"updated">;
+  fields?: Array<"id"|"driver"|"number"|"categories"|"created"|"updated"|"created"|"updated">;
 };
 
 export type CnhListOptions = CnhCommonOptions & {
@@ -573,7 +573,7 @@ export type TestExpand = {
 };
 
 export type TestCommonOptions = {
-  fields?: Array<"id"|"json"|"created"|"updated">;
+  fields?: Array<"id"|"json"|"created"|"updated"|"created"|"updated">;
 };
 
 export type TestListOptions = TestCommonOptions & {

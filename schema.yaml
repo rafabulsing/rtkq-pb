@@ -16,6 +16,12 @@ collections:
       - name: "deleted"
         type: "datetime"
 
+      - name: "created"
+        type: "autoDatetime"
+
+      - name: "updated"
+        type: "autoDatetime"
+
   - name: "cnhs"
     singular: "cnh"
     plural: "cnhs"
@@ -38,6 +44,12 @@ collections:
           - "c"
           - "d"
           - "e"
+      
+      - name: "created"
+        type: "autoDatetime"
+
+      - name: "updated"
+        type: "autoDatetime"
 
   - name: "test"
     singular: "test"
@@ -45,6 +57,10 @@ collections:
     properties:
       - name: "json"
         type: "json"
+      - name: "created"
+        type: "autoDatetime"
+      - name: "updated"
+        type: "autoDatetime"
 
   # - name: "vehicles"
   #   singular: "vehicle"

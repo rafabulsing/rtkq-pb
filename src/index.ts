@@ -229,6 +229,30 @@ class DateTimeField extends Field {
   }
 }
 
+class AutoDateTimeField extends Field {
+  static readonly type = "autoDatetime";
+
+  constructor(field: UnknownField) {
+    super(field);
+  }
+
+  getParsedType(): string {
+    return "Date";
+  }
+
+  getSerializedType(): string {
+    return "string";
+  }
+
+  getParser(): string | null {
+    return `parseISO(record.${this.name})`;
+  }
+
+  getSerializer(): string | null {
+    return `formatISO(record.${this.name})`;
+  }
+}
+
 class BooleanField extends Field {
   static readonly type = "boolean";
   constructor(field: UnknownField) {
@@ -396,15 +420,14 @@ const fieldClasses = [
   JsonField,
   SelectField,
   FileField,
+  AutoDateTimeField,
 ];
 
 const fieldClassesMap = Object.fromEntries(
   fieldClasses.map((fieldType) => [fieldType.type, fieldType]),
 );
 
-// TODO: File, GeoPoint, Autodate
-
-// TODO: deal with multiple file
+// TODO: GeoPoint
 
 // TODO: deal with optional files
 
@@ -439,6 +462,7 @@ fs.writeFileSync(
           updateSerializedType: f.getUpdateSerializedType(),
           isFile: f instanceof FileField,
           isMultiple: "mode" in f && f.mode === "multiple",
+          isAuto: f instanceof AutoDateTimeField,
           parser: f.getParser(),
           serializer: f.getSerializer(),
         })),

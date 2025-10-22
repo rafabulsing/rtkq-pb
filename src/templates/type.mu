@@ -28,8 +28,6 @@ export type {{singularUpperCase}} = {
   {{#fields}}
   {{name}}: {{&parsedType}};
   {{/fields}}
-  created: Date;
-  updated: Date;
   {{#includeExpand}}
   expand: {
     {{#expand}}
@@ -44,8 +42,6 @@ export type Serialized{{singularUpperCase}} = {
   {{#fields}}
   {{name}}: {{&serializedType}};
   {{/fields}}
-  created: string;
-  updated: string;
   {{#includeExpand}}
   expand: {
     {{#expand}}
@@ -57,20 +53,26 @@ export type Serialized{{singularUpperCase}} = {
 
 export type Create{{singularUpperCase}} = {
   {{#fields}}
+  {{^isAuto}}
   {{name}}: {{&createParsedType}};
+  {{/isAuto}}
   {{/fields}}
 };
 
 export type SerializedCreate{{singularUpperCase}} = {
   {{#fields}}
+  {{^isAuto}}
   {{name}}: {{&createSerializedType}};
+  {{/isAuto}}
   {{/fields}}
 };
 
 export type Update{{singularUpperCase}} = {
   id: string;
   {{#fields}}
+  {{^isAuto}}
   {{name}}{{#isFile}}?{{/isFile}}: {{&updateParsedType}};
+  {{/isAuto}}
   {{#isFile}}{{#isMultiple}}
   {{name}}Append?: File[];
   {{name}}Prepend?: File[];
@@ -82,7 +84,9 @@ export type Update{{singularUpperCase}} = {
 export type SerializedUpdate{{singularUpperCase}} = {
   id: string;
   {{#fields}}
+  {{^isAuto}}
   {{name}}{{#isFile}}?{{/isFile}}: {{&updateSerializedType}};
+  {{/isAuto}}
   {{#isFile}}{{#isMultiple}}
   "{{name}}+"?: File[];
   "+{{name}}"?: File[];
@@ -143,8 +147,6 @@ export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase
     {{name}}: {{parser}},
     {{/parser}}
     {{/fields}}
-    created: parseISO(record.created),
-    updated: parseISO(record.updated),
     {{#includeExpand}}
     expand: record.expand && {
       {{#expand}}
@@ -163,8 +165,6 @@ export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): S
     {{name}}: {{serializer}},
     {{/serializer}}
     {{/fields}}
-    created: formatISO(record.created),
-    updated: formatISO(record.updated),
     {{#includeExpand}}
     expand: record.expand && {
       {{#expand}}
@@ -179,9 +179,11 @@ export function serializeCreate{{singularUpperCase}}(record: Create{{singularUpp
   return {
     ...record,
     {{#fields}}
+    {{^isAuto}}
     {{#serializer}}
     {{name}}: {{serializer}},
     {{/serializer}}
+    {{/isAuto}}
     {{/fields}}
   };
 }
@@ -190,9 +192,11 @@ export function serializeUpdate{{singularUpperCase}}(record: Update{{singularUpp
   return {
     ...record,
     {{#fields}}
+    {{^isAuto}}
     {{#serializer}}
     {{name}}: {{serializer}},
     {{/serializer}}
+    {{/isAuto}}
     {{#isFile}}{{#isMultiple}}
     "{{name}}+": record.{{name}}Append,
     "+{{name}}": record.{{name}}Prepend,
