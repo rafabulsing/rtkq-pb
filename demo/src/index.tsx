@@ -18,13 +18,13 @@ export type AppDispatch = typeof store.dispatch;
 
 export function App() {
 	useEffect(() => {
-		// pb.collection("accounts").authWithPassword("rafabulsing@gmail.com", "Password1!");
+		pb.collection("accounts").authWithPassword("rafabulsing@gmail.com", "Password1!");
 	}, []);
 	return (
 		<Provider store={store}>
 			<div>
-				{/* <Drivers /> */}
-				<Cnhs />
+				<Drivers />
+				{/* <Cnhs /> */}
 			</div>
 		</Provider>
 	);
@@ -36,10 +36,6 @@ function Cnhs() {
 			driver: {},
 		},
 	});
-
-	const testsQuery = testsApi.useGetFullListTestsQuery();
-
-	console.log(testsQuery.data);
 
 	const cnhs = cnhsQuery.currentData ?? [];
 
@@ -86,20 +82,20 @@ function Drivers() {
 				<thead>
 					<tr>
 						<td>id</td>
+						<td>avatar</td>
 						<td>fullName</td>
 						<td>email</td>
 						<td>deleted</td>
-						<td>expand</td>
 					</tr>
 				</thead>
 				<tbody>
 					{drivers.map((d) => (
 						<tr>
 							<td>{d.id}</td>
+							<td>{d.avatar}</td>
 							<td>{d.fullName}</td>
 							<td>{d.email}</td>
 							<td>{d.deleted}</td>
-							<td>{d}</td>
 						</tr>
 					))}
 				</tbody>

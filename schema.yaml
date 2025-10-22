@@ -9,8 +9,9 @@ collections:
       - name: "email"
         type: "plainText"
 
-      # - name: "avatar"
-      #   type: "file"
+      - name: "avatar"
+        type: "file"
+        mode: "single"
 
       - name: "deleted"
         type: "datetime"

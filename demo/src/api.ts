@@ -26,6 +26,7 @@ export type Driver = {
   id: string;
   fullName: string;
   email: string;
+  avatar: string;
   deleted: Date;
   created: Date;
   updated: Date;
@@ -35,6 +36,7 @@ export type SerializedDriver = {
   id: string;
   fullName: string;
   email: string;
+  avatar: string;
   deleted: string;
   created: string;
   updated: string;
@@ -43,12 +45,14 @@ export type SerializedDriver = {
 export type CreateDriver = {
   fullName: string;
   email: string;
+  avatar: File;
   deleted: Date;
 };
 
 export type SerializedCreateDriver = {
   fullName: string;
   email: string;
+  avatar: File;
   deleted: string;
 };
 
@@ -56,6 +60,7 @@ export type UpdateDriver = {
   id: string;
   fullName: string;
   email: string;
+  avatar?: File|undefined|"";
   deleted: Date;
 };
 
@@ -63,6 +68,7 @@ export type SerializedUpdateDriver = {
   id: string;
   fullName: string;
   email: string;
+  avatar?: File|undefined|"";
   deleted: string;
 };
 
@@ -71,7 +77,7 @@ export type DriverExpand = {
 };
 
 export type DriverCommonOptions = {
-  fields?: Array<"id"|"fullName"|"email"|"deleted"|"created"|"updated">;
+  fields?: Array<"id"|"fullName"|"email"|"avatar"|"deleted"|"created"|"updated">;
 };
 
 export type DriverListOptions = DriverCommonOptions & {
@@ -114,15 +120,26 @@ export function parseDriver(record: SerializedDriver): Driver {
   };
 }
 
-export function serializeDriver(record: Driver): SerializedDriver;
-export function serializeDriver(record: CreateDriver): SerializedCreateDriver;
-export function serializeDriver(record: UpdateDriver): SerializedUpdateDriver;
-export function serializeDriver(record: Driver | CreateDriver | UpdateDriver): SerializedDriver | SerializedCreateDriver | SerializedUpdateDriver {
+export function serializeDriver(record: Driver): SerializedDriver {
   return {
     ...record,
     deleted: formatISO(record.deleted),
-    created: "created" in record ? formatISO(record.created) : undefined,
-    updated: "updated" in record ? formatISO(record.updated) : undefined,
+    created: formatISO(record.created),
+    updated: formatISO(record.updated),
+  };
+}
+
+export function serializeCreateDriver(record: CreateDriver): SerializedCreateDriver {
+  return {
+    ...record,
+    deleted: formatISO(record.deleted),
+  };
+}
+
+export function serializeUpdateDriver(record: UpdateDriver): SerializedUpdateDriver {
+  return {
+    ...record,
+    deleted: formatISO(record.deleted),
   };
 }
 
@@ -211,7 +228,7 @@ export const driversApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeDriver(args.record);
+          const serializedRecord = serializeCreateDriver(args.record);
           const data = await pb.collection("drivers").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -228,7 +245,7 @@ export const driversApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeDriver(args.record);
+          const serializedRecord = serializeUpdateDriver(args.record);
           const data = await pb.collection("drivers").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -361,14 +378,26 @@ export function parseCnh(record: SerializedCnh): Cnh {
   };
 }
 
-export function serializeCnh(record: Cnh): SerializedCnh;
-export function serializeCnh(record: CreateCnh): SerializedCreateCnh;
-export function serializeCnh(record: UpdateCnh): SerializedUpdateCnh;
-export function serializeCnh(record: Cnh | CreateCnh | UpdateCnh): SerializedCnh | SerializedCreateCnh | SerializedUpdateCnh {
+export function serializeCnh(record: Cnh): SerializedCnh {
   return {
     ...record,
-    created: "created" in record ? formatISO(record.created) : undefined,
-    updated: "updated" in record ? formatISO(record.updated) : undefined,
+    created: formatISO(record.created),
+    updated: formatISO(record.updated),
+    expand: record.expand && {
+      driver: record.expand.driver.map(serializeDriver),
+    },
+  };
+}
+
+export function serializeCreateCnh(record: CreateCnh): SerializedCreateCnh {
+  return {
+    ...record,
+  };
+}
+
+export function serializeUpdateCnh(record: UpdateCnh): SerializedUpdateCnh {
+  return {
+    ...record,
   };
 }
 
@@ -457,7 +486,7 @@ export const cnhsApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeCnh(args.record);
+          const serializedRecord = serializeCreateCnh(args.record);
           const data = await pb.collection("cnhs").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -474,7 +503,7 @@ export const cnhsApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeCnh(args.record);
+          const serializedRecord = serializeUpdateCnh(args.record);
           const data = await pb.collection("cnhs").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -586,14 +615,23 @@ export function parseTest(record: SerializedTest): Test {
   };
 }
 
-export function serializeTest(record: Test): SerializedTest;
-export function serializeTest(record: CreateTest): SerializedCreateTest;
-export function serializeTest(record: UpdateTest): SerializedUpdateTest;
-export function serializeTest(record: Test | CreateTest | UpdateTest): SerializedTest | SerializedCreateTest | SerializedUpdateTest {
+export function serializeTest(record: Test): SerializedTest {
   return {
     ...record,
-    created: "created" in record ? formatISO(record.created) : undefined,
-    updated: "updated" in record ? formatISO(record.updated) : undefined,
+    created: formatISO(record.created),
+    updated: formatISO(record.updated),
+  };
+}
+
+export function serializeCreateTest(record: CreateTest): SerializedCreateTest {
+  return {
+    ...record,
+  };
+}
+
+export function serializeUpdateTest(record: UpdateTest): SerializedUpdateTest {
+  return {
+    ...record,
   };
 }
 
@@ -682,7 +720,7 @@ export const testsApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeTest(args.record);
+          const serializedRecord = serializeCreateTest(args.record);
           const data = await pb.collection("test").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -699,7 +737,7 @@ export const testsApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeTest(args.record);
+          const serializedRecord = serializeUpdateTest(args.record);
           const data = await pb.collection("test").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {

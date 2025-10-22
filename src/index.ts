@@ -13,8 +13,23 @@ type Collection = {
 abstract class Field {
   readonly name: string;
   static readonly type: string;
+
   abstract getParsedType(): string;
   abstract getSerializedType(): string;
+
+  getCreateParsedType(): string {
+    return this.getParsedType();
+  }
+  getCreateSerializedType(): string {
+    return this.getSerializedType();
+  }
+  getUpdateParsedType(): string {
+    return this.getParsedType();
+  }
+  getUpdateSerializedType(): string {
+    return this.getSerializedType();
+  }
+  
   getParser(): string|null {
     return null;
   }
@@ -304,6 +319,71 @@ class SelectField extends Field {
   }
 }
 
+class FileField extends Field {
+  static readonly type = "file";
+  mode: "single"|"multiple";
+
+  constructor(field: UnknownField) {
+    super(field);
+
+    if (!("mode" in field)) {
+      throw new Error(`FileField ${field.name}: Property "mode" is missing`);
+    }
+
+    if (typeof field.mode !== "string") {
+      throw new Error(`FileField ${field.name}: Property "mode" is of type ${typeof field.mode}. Must be a string, either "single" or "multiple"`);
+    }
+
+    if (!["single", "multiple"].includes(field.mode)) {
+      throw new Error(`FileField ${field.name}: Property "mode" is "${field.mode}". Must be either "single" or "multiple"`);
+    }
+
+    this.mode = field.mode as "single"|"multiple";
+  }
+
+  getParsedType(): string {
+    return this.mode === "single"
+      ? "string"
+      : "string[]"
+    ;
+  }
+
+  getSerializedType(): string {
+    return this.mode === "single"
+      ? "string"
+      : "string[]"
+    ;
+  }
+
+  getCreateParsedType(): string {
+    return this.mode === "single"
+      ? "File"
+      : "File[]"
+    ;
+  }
+
+  getCreateSerializedType(): string {
+    return this.mode === "single"
+      ? "File"
+      : "File[]"
+    ;
+  }
+
+  getUpdateParsedType(): string {
+    return this.mode === "single"
+      ? "File|undefined|\"\""
+      : "File[]|undefined|[]"
+    ;
+  }
+
+  getUpdateSerializedType(): string {
+    return this.mode === "single"
+      ? "File|undefined|\"\""
+      : "File[]|undefined|[]"
+    ;
+  }
+}
+
 const fieldClasses = [
   PlainTextField,
   RichTextField,
@@ -315,6 +395,7 @@ const fieldClasses = [
   BooleanField,
   JsonField,
   SelectField,
+  FileField,
 ];
 
 const fieldClassesMap = Object.fromEntries(
@@ -324,6 +405,8 @@ const fieldClassesMap = Object.fromEntries(
 // TODO: File, GeoPoint, Autodate
 
 // TODO: deal with multiple file
+
+// TODO: deal with optional files
 
 // TODO: wrapper hook that parses dates
 
@@ -350,6 +433,12 @@ fs.writeFileSync(
           name: f.name,
           parsedType: f.getParsedType(),
           serializedType: f.getSerializedType(),
+          createParsedType: f.getCreateParsedType(),
+          createSerializedType: f.getCreateSerializedType(),
+          updateParsedType: f.getUpdateParsedType(),
+          updateSerializedType: f.getUpdateSerializedType(),
+          isFile: f instanceof FileField,
+          isMultiple: "mode" in f && f.mode === "multiple",
           parser: f.getParser(),
           serializer: f.getSerializer(),
         })),

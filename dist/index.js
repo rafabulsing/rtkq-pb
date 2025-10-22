@@ -10,6 +10,18 @@ const mustache_1 = __importDefault(require("mustache"));
 class Field {
     name;
     static type;
+    getCreateParsedType() {
+        return this.getParsedType();
+    }
+    getCreateSerializedType() {
+        return this.getSerializedType();
+    }
+    getUpdateParsedType() {
+        return this.getParsedType();
+    }
+    getUpdateSerializedType() {
+        return this.getSerializedType();
+    }
     getParser() {
         return null;
     }
@@ -239,6 +251,53 @@ class SelectField extends Field {
             : `Array<${optionsType}>`;
     }
 }
+class FileField extends Field {
+    static type = "file";
+    mode;
+    constructor(field) {
+        super(field);
+        if (!("mode" in field)) {
+            throw new Error(`FileField ${field.name}: Property "mode" is missing`);
+        }
+        if (typeof field.mode !== "string") {
+            throw new Error(`FileField ${field.name}: Property "mode" is of type ${typeof field.mode}. Must be a string, either "single" or "multiple"`);
+        }
+        if (!["single", "multiple"].includes(field.mode)) {
+            throw new Error(`FileField ${field.name}: Property "mode" is "${field.mode}". Must be either "single" or "multiple"`);
+        }
+        this.mode = field.mode;
+    }
+    getParsedType() {
+        return this.mode === "single"
+            ? "string"
+            : "string[]";
+    }
+    getSerializedType() {
+        return this.mode === "single"
+            ? "string"
+            : "string[]";
+    }
+    getCreateParsedType() {
+        return this.mode === "single"
+            ? "File"
+            : "File[]";
+    }
+    getCreateSerializedType() {
+        return this.mode === "single"
+            ? "File"
+            : "File[]";
+    }
+    getUpdateParsedType() {
+        return this.mode === "single"
+            ? "File|undefined|\"\""
+            : "File[]|undefined|[]";
+    }
+    getUpdateSerializedType() {
+        return this.mode === "single"
+            ? "File|undefined|\"\""
+            : "File[]|undefined|[]";
+    }
+}
 const fieldClasses = [
     PlainTextField,
     RichTextField,
@@ -250,10 +309,12 @@ const fieldClasses = [
     BooleanField,
     JsonField,
     SelectField,
+    FileField,
 ];
 const fieldClassesMap = Object.fromEntries(fieldClasses.map((fieldType) => [fieldType.type, fieldType]));
 // TODO: File, GeoPoint, Autodate
 // TODO: deal with multiple file
+// TODO: deal with optional files
 // TODO: wrapper hook that parses dates
 const file = fs_1.default.readFileSync("./schema.yaml", "utf-8");
 const parsed = yaml_1.default.parse(file);
@@ -275,6 +336,12 @@ fs_1.default.writeFileSync("demo/src/api.ts", mustache_1.default.render(typeTemp
                 name: f.name,
                 parsedType: f.getParsedType(),
                 serializedType: f.getSerializedType(),
+                createParsedType: f.getCreateParsedType(),
+                createSerializedType: f.getCreateSerializedType(),
+                updateParsedType: f.getUpdateParsedType(),
+                updateSerializedType: f.getUpdateSerializedType(),
+                isFile: f instanceof FileField,
+                isMultiple: "mode" in f && f.mode === "multiple",
                 parser: f.getParser(),
                 serializer: f.getSerializer(),
             })),

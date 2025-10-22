@@ -57,27 +57,37 @@ export type Serialized{{singularUpperCase}} = {
 
 export type Create{{singularUpperCase}} = {
   {{#fields}}
-  {{name}}: {{&parsedType}};
+  {{name}}: {{&createParsedType}};
   {{/fields}}
 };
 
 export type SerializedCreate{{singularUpperCase}} = {
   {{#fields}}
-  {{name}}: {{&serializedType}};
+  {{name}}: {{&createSerializedType}};
   {{/fields}}
 };
 
 export type Update{{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{name}}: {{&parsedType}};
+  {{name}}{{#isFile}}?{{/isFile}}: {{&updateParsedType}};
+  {{#isFile}}{{#isMultiple}}
+  {{name}}Append?: File[];
+  {{name}}Prepend?: File[];
+  {{name}}Remove?: string[];
+  {{/isMultiple}}{{/isFile}}
   {{/fields}}
 };
 
 export type SerializedUpdate{{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{name}}: {{&serializedType}};
+  {{name}}{{#isFile}}?{{/isFile}}: {{&updateSerializedType}};
+  {{#isFile}}{{#isMultiple}}
+  "{{name}}+"?: File[];
+  "+{{name}}"?: File[];
+  "{{name}}-"?: string[];
+  {{/isMultiple}}{{/isFile}}
   {{/fields}}
 };
 
@@ -145,10 +155,7 @@ export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase
   };
 }
 
-export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): Serialized{{singularUpperCase}};
-export function serialize{{singularUpperCase}}(record: Create{{singularUpperCase}}): SerializedCreate{{singularUpperCase}};
-export function serialize{{singularUpperCase}}(record: Update{{singularUpperCase}}): SerializedUpdate{{singularUpperCase}};
-export function serialize{{singularUpperCase}}(record: {{singularUpperCase}} | Create{{singularUpperCase}} | Update{{singularUpperCase}}): Serialized{{singularUpperCase}} | SerializedCreate{{singularUpperCase}} | SerializedUpdate{{singularUpperCase}} {
+export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): Serialized{{singularUpperCase}} {
   return {
     ...record,
     {{#fields}}
@@ -156,8 +163,42 @@ export function serialize{{singularUpperCase}}(record: {{singularUpperCase}} | C
     {{name}}: {{serializer}},
     {{/serializer}}
     {{/fields}}
-    created: "created" in record ? formatISO(record.created) : undefined,
-    updated: "updated" in record ? formatISO(record.updated) : undefined,
+    created: formatISO(record.created),
+    updated: formatISO(record.updated),
+    {{#includeExpand}}
+    expand: record.expand && {
+      {{#expand}}
+      {{name}}: {{^isMultiple}}serialize{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(serialize{{resolvedTo}}){{/isMultiple}},
+      {{/expand}}
+    },
+    {{/includeExpand}}
+  };
+}
+
+export function serializeCreate{{singularUpperCase}}(record: Create{{singularUpperCase}}): SerializedCreate{{singularUpperCase}} {
+  return {
+    ...record,
+    {{#fields}}
+    {{#serializer}}
+    {{name}}: {{serializer}},
+    {{/serializer}}
+    {{/fields}}
+  };
+}
+
+export function serializeUpdate{{singularUpperCase}}(record: Update{{singularUpperCase}}): SerializedUpdate{{singularUpperCase}} {
+  return {
+    ...record,
+    {{#fields}}
+    {{#serializer}}
+    {{name}}: {{serializer}},
+    {{/serializer}}
+    {{#isFile}}{{#isMultiple}}
+    "{{name}}+": record.{{name}}Append,
+    "+{{name}}": record.{{name}}Prepend,
+    "{{name}}-": record.{{name}}Remove,
+    {{/isMultiple}}{{/isFile}}
+    {{/fields}}
   };
 }
 
@@ -246,7 +287,7 @@ export const {{plural}}Api = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serialize{{singularUpperCase}}(args.record);
+          const serializedRecord = serializeCreate{{singularUpperCase}}(args.record);
           const data = await pb.collection("{{name}}").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -263,7 +304,7 @@ export const {{plural}}Api = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serialize{{singularUpperCase}}(args.record);
+          const serializedRecord = serializeUpdate{{singularUpperCase}}(args.record);
           const data = await pb.collection("{{name}}").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
