@@ -433,6 +433,8 @@ const fieldClassesMap = Object.fromEntries(
 
 // TODO: wrapper hook that parses dates
 
+// TODO: wrapper that typechecks extends
+
 const file = fs.readFileSync("./schema.yaml", "utf-8");
 const parsed = yaml.parse(file) as { collections: Collection[] };
 const typeTemplate = fs.readFileSync(path.join(__dirname, "templates", "type.mu")).toString();
