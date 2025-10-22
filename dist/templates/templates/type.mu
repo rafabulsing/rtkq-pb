@@ -1,7 +1,0 @@
-{{#collections}}
-export type {{ name }} = {
-    {{#properties}}
-    {{name}}: {{type}};
-    {{/properties}}
-};
-{{/collections}}
