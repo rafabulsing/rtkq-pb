@@ -449,60 +449,63 @@ const fieldClassesMap = Object.fromEntries(
 
 // TODO: wrapper that typechecks extends
 
-const file = fs.readFileSync("./schema.yaml", "utf-8");
-const parsed = yaml.parse(file) as { collections: Collection[] };
-const typeTemplate = fs.readFileSync(path.join(__dirname, "templates", "type.mu")).toString();
+export function schemaToTypes(inputFilePath: string, outputFilePath: string) {
+  const file = fs.readFileSync(inputFilePath, "utf-8");
+  const parsed = yaml.parse(file) as { collections: Collection[] };
+  const typeTemplate = fs.readFileSync(path.join(__dirname, "templates", "type.mu")).toString();
+  
+  fs.writeFileSync(
+    outputFilePath,
+    mustache.render(typeTemplate, {
+      collections: parsed.collections.map((c) => {
+        let fields: Field[];
+        try {
+          fields = c.properties.map(parseField);
+        } catch (err) {
+          throw new Error(`Collection ${c.name}: Failed to parse fields`, { cause: err });
+        }
+  
+        return {
+          ...c,
+          singularUpperCase: upperCaseFirstChar(c.singular),
+          pluralUpperCase: upperCaseFirstChar(c.plural),
+          fields: fields.map((f) => ({
+            name: f.name,
+            parsedType: f.getParsedType(),
+            serializedType: f.getSerializedType(),
+            createParsedType: f.getCreateParsedType(),
+            createSerializedType: f.getCreateSerializedType(),
+            updateParsedType: f.getUpdateParsedType(),
+            updateSerializedType: f.getUpdateSerializedType(),
+            isFile: f instanceof FileField,
+            isMultiple: "mode" in f && f.mode === "multiple",
+            isAuto: f instanceof AutoDateTimeField,
+            parser: f.getParser(),
+            serializer: f.getSerializer(),
+          })),
+          includeExpand: fields.some((f) => f instanceof RelationField),
+          expand: fields
+            .filter((f) => f instanceof RelationField)
+            .map((f) => {
+              const resolvedTo = parsed.collections.find((c) => c.name === f.to);
+  
+              if (!resolvedTo) {
+                throw new Error(`Collection ${c.name}: RelationField ${f.name} references non-existant collection "${f.to}"`);
+              }
+  
+              return {
+                name: f.name,
+                resolvedTo: upperCaseFirstChar(resolvedTo.singular),
+                isMultiple: f.mode === "multiple",
+              };
+            })
+          ,
+        };
+      }),
+    })
+  );
+}
 
-fs.writeFileSync(
-  "demo/src/api.ts",
-  mustache.render(typeTemplate, {
-    collections: parsed.collections.map((c) => {
-      let fields: Field[];
-      try {
-        fields = c.properties.map(parseField);
-      } catch (err) {
-        throw new Error(`Collection ${c.name}: Failed to parse fields`, { cause: err });
-      }
-
-      return {
-        ...c,
-        singularUpperCase: upperCaseFirstChar(c.singular),
-        pluralUpperCase: upperCaseFirstChar(c.plural),
-        fields: fields.map((f) => ({
-          name: f.name,
-          parsedType: f.getParsedType(),
-          serializedType: f.getSerializedType(),
-          createParsedType: f.getCreateParsedType(),
-          createSerializedType: f.getCreateSerializedType(),
-          updateParsedType: f.getUpdateParsedType(),
-          updateSerializedType: f.getUpdateSerializedType(),
-          isFile: f instanceof FileField,
-          isMultiple: "mode" in f && f.mode === "multiple",
-          isAuto: f instanceof AutoDateTimeField,
-          parser: f.getParser(),
-          serializer: f.getSerializer(),
-        })),
-        includeExpand: fields.some((f) => f instanceof RelationField),
-        expand: fields
-          .filter((f) => f instanceof RelationField)
-          .map((f) => {
-            const resolvedTo = parsed.collections.find((c) => c.name === f.to);
-
-            if (!resolvedTo) {
-              throw new Error(`Collection ${c.name}: RelationField ${f.name} references non-existant collection "${f.to}"`);
-            }
-
-            return {
-              name: f.name,
-              resolvedTo: upperCaseFirstChar(resolvedTo.singular),
-              isMultiple: f.mode === "multiple",
-            };
-          })
-        ,
-      };
-    }),
-  })
-);
 
 function upperCaseFirstChar(str: string): string {
   if (str.length === 0) {

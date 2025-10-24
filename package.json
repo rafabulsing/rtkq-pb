@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch": "npx nodemon --exec \"npx tsc && mkdir -p dist/templates && cp -rf src/templates/* dist/templates/ && node dist/index.js\"",
+    "build": "run-script-os",
+    "build:windows": "powershell scripts\\build.ps1",
+    "build:unix": "./scripts/build.sh",
+    "watch": "npx nodemon --exec \"npm run build && node dist/index.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,11 +15,13 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "commander": "^14.0.1",
     "mustache": "^4.2.0",
     "typescript": "^5.9.3",
     "yaml": "^2.8.1"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^14.0.0",
     "@reduxjs/toolkit": "^2.9.0",
     "@types/mustache": "^4.2.6",
     "@types/node": "^24.7.2",
@@ -24,6 +29,7 @@
     "nodemon": "^3.1.10",
     "pocketbase": "^0.26.2",
     "react": "^19.2.0",
+    "run-script-os": "^1.1.6",
     "tsx": "^4.20.6"
   }
 }

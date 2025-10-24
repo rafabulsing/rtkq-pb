@@ -9,6 +9,11 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
+
+    "typeRoots": [
+      "node_modules/@types",
+      "src/@types"
+    ],
     
     // For nodejs:
     "lib": ["esnext"],
