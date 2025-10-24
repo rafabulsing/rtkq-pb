@@ -408,6 +408,19 @@ class FileField extends Field {
   }
 }
 
+class GeoPointField extends Field {
+  static readonly type = "geoPoint";
+  constructor(field: UnknownField) {
+    super(field);
+  }
+  getParsedType(): string {
+    return "{ lat: number, lon: number }";
+  }
+  getSerializedType(): string {
+    return "{ lat: number, lon: number }";
+  }
+}
+
 const fieldClasses = [
   PlainTextField,
   RichTextField,
@@ -421,6 +434,7 @@ const fieldClasses = [
   SelectField,
   FileField,
   AutoDateTimeField,
+  GeoPointField,
 ];
 
 const fieldClassesMap = Object.fromEntries(

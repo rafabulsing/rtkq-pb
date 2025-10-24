@@ -51,15 +51,15 @@ collections:
       - name: "updated"
         type: "autoDatetime"
 
-  - name: "test"
-    singular: "test"
-    plural: "tests"
+  - name: "testCollection"
+    singular: "testRecord"
+    plural: "testRecords"
     properties:
-      - name: "json"
-        type: "json"
-      - name: "created"
+      - name: "testGeo"
+        type: "geoPoint"
+      - name: "createdAt"
         type: "autoDatetime"
-      - name: "updated"
+      - name: "updatedAt"
         type: "autoDatetime"
 
   # - name: "vehicles"

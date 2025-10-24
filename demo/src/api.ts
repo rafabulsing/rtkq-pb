@@ -7,7 +7,7 @@ export interface TypedPockedBase extends PocketBase {
   collection(idOrName: string): RecordService<never>;
   collection(idOrName: "drivers"): RecordService<Driver>;
   collection(idOrName: "cnhs"): RecordService<Cnh>;
-  collection(idOrName: "test"): RecordService<Test>;
+  collection(idOrName: "testCollection"): RecordService<TestRecord>;
 }
 
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
@@ -18,7 +18,7 @@ export const api = createApi({
   tagTypes: [
     "drivers",
     "cnhs",
-    "test",
+    "testCollection",
   ],
 });
 
@@ -536,47 +536,47 @@ export const cnhsApi = api.injectEndpoints({
   }),
 });
 
-export type Test = {
+export type TestRecord = {
   id: string;
-  json: unknown;
-  created: Date;
-  updated: Date;
+  testGeo: { lat: number, lon: number };
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-export type SerializedTest = {
+export type SerializedTestRecord = {
   id: string;
-  json: unknown;
-  created: string;
-  updated: string;
+  testGeo: { lat: number, lon: number };
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type CreateTest = {
-  json: unknown;
+export type CreateTestRecord = {
+  testGeo: { lat: number, lon: number };
 };
 
-export type SerializedCreateTest = {
-  json: unknown;
+export type SerializedCreateTestRecord = {
+  testGeo: { lat: number, lon: number };
 };
 
-export type UpdateTest = {
+export type UpdateTestRecord = {
   id: string;
-  json: unknown;
+  testGeo: { lat: number, lon: number };
 };
 
-export type SerializedUpdateTest = {
+export type SerializedUpdateTestRecord = {
   id: string;
-  json: unknown;
+  testGeo: { lat: number, lon: number };
 };
 
-export type TestExpand = {
+export type TestRecordExpand = {
   [key: string]: never;  
 };
 
-export type TestCommonOptions = {
-  fields?: Array<"id"|"json"|"created"|"updated"|"created"|"updated">;
+export type TestRecordCommonOptions = {
+  fields?: Array<"id"|"testGeo"|"createdAt"|"updatedAt"|"created"|"updated">;
 };
 
-export type TestListOptions = TestCommonOptions & {
+export type TestRecordListOptions = TestRecordCommonOptions & {
   page?: number;
   perPage?: number;
   sort?: string;
@@ -584,60 +584,60 @@ export type TestListOptions = TestCommonOptions & {
   skipTotal?: boolean;
 };
 
-export type TestFullListOptions = TestListOptions & {
-  expand?: TestExpand;
+export type TestRecordFullListOptions = TestRecordListOptions & {
+  expand?: TestRecordExpand;
   batch?: number;
 };
 
-export type TestRecordOptions = TestCommonOptions & {
-  expand?: TestExpand;
+export type TestRecordRecordOptions = TestRecordCommonOptions & {
+  expand?: TestRecordExpand;
 };
 
-export type TestRecordListOptions = unknown
-  & TestRecordOptions
-  & TestListOptions
+export type TestRecordRecordListOptions = unknown
+  & TestRecordRecordOptions
+  & TestRecordListOptions
   & {
     page?: number;
     perPage?: number;
   }
 ;
 
-export type TestRecordFullListOptions =
-  & TestFullListOptions
-  & TestRecordOptions
+export type TestRecordRecordFullListOptions =
+  & TestRecordFullListOptions
+  & TestRecordRecordOptions
 ;
 
-export function parseTest(record: SerializedTest): Test {
+export function parseTestRecord(record: SerializedTestRecord): TestRecord {
   return {
     ...record,
-    created: parseISO(record.created),
-    updated: parseISO(record.updated),
+    createdAt: parseISO(record.createdAt),
+    updatedAt: parseISO(record.updatedAt),
   };
 }
 
-export function serializeTest(record: Test): SerializedTest {
+export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
   return {
     ...record,
-    created: formatISO(record.created),
-    updated: formatISO(record.updated),
+    createdAt: formatISO(record.createdAt),
+    updatedAt: formatISO(record.updatedAt),
   };
 }
 
-export function serializeCreateTest(record: CreateTest): SerializedCreateTest {
-  return {
-    ...record,
-  };
-}
-
-export function serializeUpdateTest(record: UpdateTest): SerializedUpdateTest {
+export function serializeCreateTestRecord(record: CreateTestRecord): SerializedCreateTestRecord {
   return {
     ...record,
   };
 }
 
-export const testsApi = api.injectEndpoints({
+export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedUpdateTestRecord {
+  return {
+    ...record,
+  };
+}
+
+export const testRecordsApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getOneTest: build.query<Test, string|({ id: string } & TestRecordOptions)>({
+    getOneTestRecord: build.query<TestRecord, string|({ id: string } & TestRecordRecordOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -648,7 +648,7 @@ export const testsApi = api.injectEndpoints({
             fields: getFieldsString(args.fields),
           };
 
-          const data = await pb.collection("test").getOne(id, options);
+          const data = await pb.collection("testCollection").getOne(id, options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -656,11 +656,11 @@ export const testsApi = api.injectEndpoints({
       },
       providesTags: (result, error, args) => !result
         ? []
-        : [{ type: "test", id: typeof args === "string" ? args : args.id }]
+        : [{ type: "testCollection", id: typeof args === "string" ? args : args.id }]
       ,
     }),
 
-    getListTests: build.query<ListResult<Test>, TestRecordListOptions|void>({
+    getListTestRecords: build.query<ListResult<TestRecord>, TestRecordRecordListOptions|void>({
       queryFn: async (args) => {
         try {
           const [page, perPage, options] = !args ? undefined : [
@@ -673,7 +673,7 @@ export const testsApi = api.injectEndpoints({
             },
           ];
 
-          const data = await pb.collection("test").getList(page, perPage, options);
+          const data = await pb.collection("testCollection").getList(page, perPage, options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -682,13 +682,13 @@ export const testsApi = api.injectEndpoints({
       providesTags: (result, error, args) => !result
         ? []
         : [
-          { type: "test", id: "LIST-tests" },
-          ...result.items.map((record) => ({ type: "test", id: record.id } as const)),
+          { type: "testCollection", id: "LIST-testRecords" },
+          ...result.items.map((record) => ({ type: "testCollection", id: record.id } as const)),
         ]
       ,
     }),
 
-    getFullListTests: build.query<Test[], TestRecordFullListOptions|void>({
+    getFullListTestRecords: build.query<TestRecord[], TestRecordRecordFullListOptions|void>({
       queryFn: async (args) => {
         try {
           const options = !args ? undefined : {
@@ -697,7 +697,7 @@ export const testsApi = api.injectEndpoints({
             fields: getFieldsString(args.fields),
           };
 
-          const data = await pb.collection("test").getFullList(options);
+          const data = await pb.collection("testCollection").getFullList(options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -706,13 +706,13 @@ export const testsApi = api.injectEndpoints({
       providesTags: (result, error, args) => !result
         ? []
         : [
-          { type: "test", id: "LIST-tests" },
-          ...result.map((record) => ({ type: "test", id: record.id } as const)),
+          { type: "testCollection", id: "LIST-testRecords" },
+          ...result.map((record) => ({ type: "testCollection", id: record.id } as const)),
         ]
       ,
     }),
 
-    createTest: build.mutation<Test, { record: CreateTest } & TestRecordOptions>({
+    createTestRecord: build.mutation<TestRecord, { record: CreateTestRecord } & TestRecordRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -720,8 +720,8 @@ export const testsApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeCreateTest(args.record);
-          const data = await pb.collection("test").create(serializedRecord, options);
+          const serializedRecord = serializeCreateTestRecord(args.record);
+          const data = await pb.collection("testCollection").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -729,7 +729,7 @@ export const testsApi = api.injectEndpoints({
       },
     }),
 
-    updateTest: build.mutation<Test, { record: UpdateTest } & TestRecordOptions>({
+    updateTestRecord: build.mutation<TestRecord, { record: UpdateTestRecord } & TestRecordRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -737,19 +737,19 @@ export const testsApi = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeUpdateTest(args.record);
-          const data = await pb.collection("test").update(args.record.id, serializedRecord, options);
+          const serializedRecord = serializeUpdateTestRecord(args.record);
+          const data = await pb.collection("testCollection").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
           return { error };
         }
       },
       invalidatesTags: (result, error, args) => [
-        { type: "test", id: args.record.id },
+        { type: "testCollection", id: args.record.id },
       ],
     }),
 
-    deleteTest: build.mutation<boolean, string|({ id: string } & TestCommonOptions)>({
+    deleteTestRecord: build.mutation<boolean, string|({ id: string } & TestRecordCommonOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -757,14 +757,14 @@ export const testsApi = api.injectEndpoints({
             ...args,
             fields: getFieldsString(args.fields),
           };
-          const data = await pb.collection("test").delete(id, options);
+          const data = await pb.collection("testCollection").delete(id, options);
           return { data };
         } catch (error: any) {
           return { error };
         }
       },
       invalidatesTags: (result, error, args) => [
-        { type: "test", id: typeof args === "string" ? args : args.id },
+        { type: "testCollection", id: typeof args === "string" ? args : args.id },
       ],
     }),
   }),
