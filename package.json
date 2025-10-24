@@ -31,5 +31,8 @@
     "react": "^19.2.0",
     "run-script-os": "^1.1.6",
     "tsx": "^4.20.6"
+  },
+  "bin": {
+    "rtkq-pb": "./dist/cli.js"
   }
 }

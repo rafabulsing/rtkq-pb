@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { program } from "commander";
 import { schemaToTypes } from ".";
 
@@ -19,4 +20,3 @@ if (!options.output) {
 }
 
 schemaToTypes(options.input, options.output);
-
