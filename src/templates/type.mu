@@ -150,7 +150,10 @@ export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase
     {{#includeExpand}}
     expand: record.expand && {
       {{#expand}}
-      {{name}}: {{^isMultiple}}parse{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(parse{{resolvedTo}}){{/isMultiple}},
+      {{name}}: record.expand.{{name}}
+        ? {{^isMultiple}}parse{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(parse{{resolvedTo}}){{/isMultiple}}
+        : undefined
+      ,
       {{/expand}}
     },
     {{/includeExpand}}
@@ -168,7 +171,10 @@ export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): S
     {{#includeExpand}}
     expand: record.expand && {
       {{#expand}}
-      {{name}}: {{^isMultiple}}serialize{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(serialize{{resolvedTo}}){{/isMultiple}},
+      {{name}}: record.expand.{{name}}
+        ? {{^isMultiple}}serialize{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(serialize{{resolvedTo}}){{/isMultiple}}
+        : undefined
+      ,
       {{/expand}}
     },
     {{/includeExpand}}
@@ -213,7 +219,7 @@ export const {{plural}}Api = api.injectEndpoints({
         try {
           const id = typeof args === "string" ? args : args.id;
 
-          const options = typeof args === "string" ? undefined : {
+          const options = typeof args === "string" ? [] : {
             ...args,
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
@@ -234,7 +240,7 @@ export const {{plural}}Api = api.injectEndpoints({
     getList{{pluralUpperCase}}: build.query<ListResult<{{singularUpperCase}}>, {{singularUpperCase}}RecordListOptions|void>({
       queryFn: async (args) => {
         try {
-          const [page, perPage, options] = !args ? undefined : [
+          const [page, perPage, options] = !args ? [] : [
             args.page,
             args.perPage,
             {
@@ -346,10 +352,10 @@ export type Expand = { [property: string]: Expand };
 
 function getExpandString(expand?: Expand): string {
   if (!expand) {
-    return undefined;
+    return "";
   }
 
-  function getExpandStringInternal(prefix: string, expand: Expand): string[]|undefined {
+  function getExpandStringInternal(prefix: string, expand: Expand): string[] {
     const withPrefix = prefix === ""
       ? ""
       : prefix + "."

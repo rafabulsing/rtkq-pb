@@ -150,7 +150,7 @@ export const driversApi = api.injectEndpoints({
         try {
           const id = typeof args === "string" ? args : args.id;
 
-          const options = typeof args === "string" ? undefined : {
+          const options = typeof args === "string" ? [] : {
             ...args,
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
@@ -171,7 +171,7 @@ export const driversApi = api.injectEndpoints({
     getListDrivers: build.query<ListResult<Driver>, DriverRecordListOptions|void>({
       queryFn: async (args) => {
         try {
-          const [page, perPage, options] = !args ? undefined : [
+          const [page, perPage, options] = !args ? [] : [
             args.page,
             args.perPage,
             {
@@ -373,7 +373,10 @@ export function parseCnh(record: SerializedCnh): Cnh {
     created: parseISO(record.created),
     updated: parseISO(record.updated),
     expand: record.expand && {
-      driver: record.expand.driver.map(parseDriver),
+      driver: record.expand.driver
+        ? record.expand.driver.map(parseDriver)
+        : undefined
+      ,
     },
   };
 }
@@ -384,7 +387,10 @@ export function serializeCnh(record: Cnh): SerializedCnh {
     created: formatISO(record.created),
     updated: formatISO(record.updated),
     expand: record.expand && {
-      driver: record.expand.driver.map(serializeDriver),
+      driver: record.expand.driver
+        ? record.expand.driver.map(serializeDriver)
+        : undefined
+      ,
     },
   };
 }
@@ -408,7 +414,7 @@ export const cnhsApi = api.injectEndpoints({
         try {
           const id = typeof args === "string" ? args : args.id;
 
-          const options = typeof args === "string" ? undefined : {
+          const options = typeof args === "string" ? [] : {
             ...args,
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
@@ -429,7 +435,7 @@ export const cnhsApi = api.injectEndpoints({
     getListCnhs: build.query<ListResult<Cnh>, CnhRecordListOptions|void>({
       queryFn: async (args) => {
         try {
-          const [page, perPage, options] = !args ? undefined : [
+          const [page, perPage, options] = !args ? [] : [
             args.page,
             args.perPage,
             {
@@ -642,7 +648,7 @@ export const testRecordsApi = api.injectEndpoints({
         try {
           const id = typeof args === "string" ? args : args.id;
 
-          const options = typeof args === "string" ? undefined : {
+          const options = typeof args === "string" ? [] : {
             ...args,
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
@@ -663,7 +669,7 @@ export const testRecordsApi = api.injectEndpoints({
     getListTestRecords: build.query<ListResult<TestRecord>, TestRecordRecordListOptions|void>({
       queryFn: async (args) => {
         try {
-          const [page, perPage, options] = !args ? undefined : [
+          const [page, perPage, options] = !args ? [] : [
             args.page,
             args.perPage,
             {
@@ -774,10 +780,10 @@ export type Expand = { [property: string]: Expand };
 
 function getExpandString(expand?: Expand): string {
   if (!expand) {
-    return undefined;
+    return "";
   }
 
-  function getExpandStringInternal(prefix: string, expand: Expand): string[]|undefined {
+  function getExpandStringInternal(prefix: string, expand: Expand): string[] {
     const withPrefix = prefix === ""
       ? ""
       : prefix + "."
