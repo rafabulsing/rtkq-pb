@@ -7,7 +7,7 @@
     "build": "run-script-os",
     "build:windows": "powershell scripts\\build.ps1",
     "build:unix": "./scripts/build.sh",
-    "watch": "npx nodemon --exec \"npm run build && node dist/index.js\"",
+    "watch": "npx nodemon --exec \"npm run build && node dist/cli.js --input schema.yaml --output demo/src/api.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
