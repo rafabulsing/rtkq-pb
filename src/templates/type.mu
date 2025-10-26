@@ -26,7 +26,7 @@ export const api = createApi({
 export type {{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{name}}: {{&parsedType}};
+  {{&parsed}}
   {{/fields}}
   {{#includeExpand}}
   expand: {
@@ -40,7 +40,7 @@ export type {{singularUpperCase}} = {
 export type Serialized{{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{name}}: {{&serializedType}};
+  {{&serialized}}
   {{/fields}}
   {{#includeExpand}}
   expand: {
@@ -53,45 +53,35 @@ export type Serialized{{singularUpperCase}} = {
 
 export type Create{{singularUpperCase}} = {
   {{#fields}}
-  {{^isAuto}}
-  {{name}}: {{&createParsedType}};
-  {{/isAuto}}
+  {{#createParsed}}
+  {{&createParsed}}
+  {{/createParsed}}
   {{/fields}}
 };
 
 export type SerializedCreate{{singularUpperCase}} = {
   {{#fields}}
-  {{^isAuto}}
-  {{name}}: {{&createSerializedType}};
-  {{/isAuto}}
+  {{#createSerialized}}
+  {{&createSerialized}}
+  {{/createSerialized}}
   {{/fields}}
 };
 
 export type Update{{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{^isAuto}}
-  {{name}}{{#isFile}}?{{/isFile}}: {{&updateParsedType}};
-  {{/isAuto}}
-  {{#isFile}}{{#isMultiple}}
-  {{name}}Append?: File[];
-  {{name}}Prepend?: File[];
-  {{name}}Remove?: string[];
-  {{/isMultiple}}{{/isFile}}
+  {{#updateParsed}}
+  {{&updateParsed}}
+  {{/updateParsed}}
   {{/fields}}
 };
 
 export type SerializedUpdate{{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{^isAuto}}
-  {{name}}{{#isFile}}?{{/isFile}}: {{&updateSerializedType}};
-  {{/isAuto}}
-  {{#isFile}}{{#isMultiple}}
-  "{{name}}+"?: File[];
-  "+{{name}}"?: File[];
-  "{{name}}-"?: string[];
-  {{/isMultiple}}{{/isFile}}
+  {{#updateSerialized}}
+  {{&updateSerialized}}
+  {{/updateSerialized}}
   {{/fields}}
 };
 
@@ -144,7 +134,7 @@ export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase
     ...record,
     {{#fields}}
     {{#parser}}
-    {{name}}: {{parser}},
+    {{parser}}
     {{/parser}}
     {{/fields}}
     {{#includeExpand}}
@@ -165,7 +155,7 @@ export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): S
     ...record,
     {{#fields}}
     {{#serializer}}
-    {{name}}: {{serializer}},
+    {{serializer}}
     {{/serializer}}
     {{/fields}}
     {{#includeExpand}}
@@ -185,11 +175,9 @@ export function serializeCreate{{singularUpperCase}}(record: Create{{singularUpp
   return {
     ...record,
     {{#fields}}
-    {{^isAuto}}
-    {{#serializer}}
-    {{name}}: {{serializer}},
-    {{/serializer}}
-    {{/isAuto}}
+    {{#createSerializer}}
+    {{createSerializer}}
+    {{/createSerializer}}
     {{/fields}}
   };
 }
@@ -198,11 +186,9 @@ export function serializeUpdate{{singularUpperCase}}(record: Update{{singularUpp
   return {
     ...record,
     {{#fields}}
-    {{^isAuto}}
-    {{#serializer}}
-    {{name}}: {{serializer}},
-    {{/serializer}}
-    {{/isAuto}}
+    {{#updateSerializer}}
+    {{updateSerializer}}
+    {{/updateSerializer}}
     {{#isFile}}{{#isMultiple}}
     "{{name}}+": record.{{name}}Append,
     "+{{name}}": record.{{name}}Prepend,

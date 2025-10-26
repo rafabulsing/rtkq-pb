@@ -5,9 +5,7 @@ import { parseISO, formatISO } from "date-fns";
 
 export interface TypedPockedBase extends PocketBase {
   collection(idOrName: string): RecordService<never>;
-  collection(idOrName: "drivers"): RecordService<Driver>;
-  collection(idOrName: "cnhs"): RecordService<Cnh>;
-  collection(idOrName: "testCollection"): RecordService<TestRecord>;
+  collection(idOrName: "testRecords"): RecordService<TestRecord>;
 }
 
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
@@ -16,570 +14,145 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: pb.baseUrl }),
   endpoints: () => ({}),
   tagTypes: [
-    "drivers",
-    "cnhs",
-    "testCollection",
+    "testRecords",
   ],
-});
-
-export type Driver = {
-  id: string;
-  fullName: string;
-  email: string;
-  avatar: string;
-  deleted: Date;
-  created: Date;
-  updated: Date;
-};
-
-export type SerializedDriver = {
-  id: string;
-  fullName: string;
-  email: string;
-  avatar: string;
-  deleted: string;
-  created: string;
-  updated: string;
-};
-
-export type CreateDriver = {
-  fullName: string;
-  email: string;
-  avatar: File;
-  deleted: Date;
-};
-
-export type SerializedCreateDriver = {
-  fullName: string;
-  email: string;
-  avatar: File;
-  deleted: string;
-};
-
-export type UpdateDriver = {
-  id: string;
-  fullName: string;
-  email: string;
-  avatar?: File|undefined|"";
-  deleted: Date;
-};
-
-export type SerializedUpdateDriver = {
-  id: string;
-  fullName: string;
-  email: string;
-  avatar?: File|undefined|"";
-  deleted: string;
-};
-
-export type DriverExpand = {
-  [key: string]: never;  
-};
-
-export type DriverCommonOptions = {
-  fields?: Array<"id"|"fullName"|"email"|"avatar"|"deleted"|"created"|"updated"|"created"|"updated">;
-};
-
-export type DriverListOptions = DriverCommonOptions & {
-  page?: number;
-  perPage?: number;
-  sort?: string;
-  filter?: string;
-  skipTotal?: boolean;
-};
-
-export type DriverFullListOptions = DriverListOptions & {
-  expand?: DriverExpand;
-  batch?: number;
-};
-
-export type DriverRecordOptions = DriverCommonOptions & {
-  expand?: DriverExpand;
-};
-
-export type DriverRecordListOptions = unknown
-  & DriverRecordOptions
-  & DriverListOptions
-  & {
-    page?: number;
-    perPage?: number;
-  }
-;
-
-export type DriverRecordFullListOptions =
-  & DriverFullListOptions
-  & DriverRecordOptions
-;
-
-export function parseDriver(record: SerializedDriver): Driver {
-  return {
-    ...record,
-    deleted: parseISO(record.deleted),
-    created: parseISO(record.created),
-    updated: parseISO(record.updated),
-  };
-}
-
-export function serializeDriver(record: Driver): SerializedDriver {
-  return {
-    ...record,
-    deleted: formatISO(record.deleted),
-    created: formatISO(record.created),
-    updated: formatISO(record.updated),
-  };
-}
-
-export function serializeCreateDriver(record: CreateDriver): SerializedCreateDriver {
-  return {
-    ...record,
-    deleted: formatISO(record.deleted),
-  };
-}
-
-export function serializeUpdateDriver(record: UpdateDriver): SerializedUpdateDriver {
-  return {
-    ...record,
-    deleted: formatISO(record.deleted),
-  };
-}
-
-export const driversApi = api.injectEndpoints({
-  endpoints: (build) => ({
-    getOneDriver: build.query<Driver, string|({ id: string } & DriverRecordOptions)>({
-      queryFn: async (args) => {
-        try {
-          const id = typeof args === "string" ? args : args.id;
-
-          const options = typeof args === "string" ? [] : {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-
-          const data = await pb.collection("drivers").getOne(id, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      providesTags: (result, error, args) => !result
-        ? []
-        : [{ type: "drivers", id: typeof args === "string" ? args : args.id }]
-      ,
-    }),
-
-    getListDrivers: build.query<ListResult<Driver>, DriverRecordListOptions|void>({
-      queryFn: async (args) => {
-        try {
-          const [page, perPage, options] = !args ? [] : [
-            args.page,
-            args.perPage,
-            {
-              ...args,
-              expand: getExpandString(args.expand),
-              fields: getFieldsString(args.fields),
-            },
-          ];
-
-          const data = await pb.collection("drivers").getList(page, perPage, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      providesTags: (result, error, args) => !result
-        ? []
-        : [
-          { type: "drivers", id: "LIST-drivers" },
-          ...result.items.map((record) => ({ type: "drivers", id: record.id } as const)),
-        ]
-      ,
-    }),
-
-    getFullListDrivers: build.query<Driver[], DriverRecordFullListOptions|void>({
-      queryFn: async (args) => {
-        try {
-          const options = !args ? undefined : {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-
-          const data = await pb.collection("drivers").getFullList(options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      providesTags: (result, error, args) => !result
-        ? []
-        : [
-          { type: "drivers", id: "LIST-drivers" },
-          ...result.map((record) => ({ type: "drivers", id: record.id } as const)),
-        ]
-      ,
-    }),
-
-    createDriver: build.mutation<Driver, { record: CreateDriver } & DriverRecordOptions>({
-      queryFn: async (args) => {
-        try {
-          const options = {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-          const serializedRecord = serializeCreateDriver(args.record);
-          const data = await pb.collection("drivers").create(serializedRecord, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-    }),
-
-    updateDriver: build.mutation<Driver, { record: UpdateDriver } & DriverRecordOptions>({
-      queryFn: async (args) => {
-        try {
-          const options = {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-          const serializedRecord = serializeUpdateDriver(args.record);
-          const data = await pb.collection("drivers").update(args.record.id, serializedRecord, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      invalidatesTags: (result, error, args) => [
-        { type: "drivers", id: args.record.id },
-      ],
-    }),
-
-    deleteDriver: build.mutation<boolean, string|({ id: string } & DriverCommonOptions)>({
-      queryFn: async (args) => {
-        try {
-          const id = typeof args === "string" ? args : args.id;
-          const options = typeof args === "string" ? undefined : {
-            ...args,
-            fields: getFieldsString(args.fields),
-          };
-          const data = await pb.collection("drivers").delete(id, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      invalidatesTags: (result, error, args) => [
-        { type: "drivers", id: typeof args === "string" ? args : args.id },
-      ],
-    }),
-  }),
-});
-
-export type Cnh = {
-  id: string;
-  driver: string[];
-  number: string;
-  categories: Array<"acc"|"a"|"b"|"c"|"d"|"e">;
-  created: Date;
-  updated: Date;
-  expand: {
-    driver?: Driver[];
-  };
-};
-
-export type SerializedCnh = {
-  id: string;
-  driver: string[];
-  number: string;
-  categories: Array<"acc"|"a"|"b"|"c"|"d"|"e">;
-  created: string;
-  updated: string;
-  expand: {
-    driver?: SerializedDriver[];
-  };
-};
-
-export type CreateCnh = {
-  driver: string[];
-  number: string;
-  categories: Array<"acc"|"a"|"b"|"c"|"d"|"e">;
-};
-
-export type SerializedCreateCnh = {
-  driver: string[];
-  number: string;
-  categories: Array<"acc"|"a"|"b"|"c"|"d"|"e">;
-};
-
-export type UpdateCnh = {
-  id: string;
-  driver: string[];
-  number: string;
-  categories: Array<"acc"|"a"|"b"|"c"|"d"|"e">;
-};
-
-export type SerializedUpdateCnh = {
-  id: string;
-  driver: string[];
-  number: string;
-  categories: Array<"acc"|"a"|"b"|"c"|"d"|"e">;
-};
-
-export type CnhExpand = {
-  driver?: DriverExpand;
-};
-
-export type CnhCommonOptions = {
-  fields?: Array<"id"|"driver"|"number"|"categories"|"created"|"updated"|"created"|"updated">;
-};
-
-export type CnhListOptions = CnhCommonOptions & {
-  page?: number;
-  perPage?: number;
-  sort?: string;
-  filter?: string;
-  skipTotal?: boolean;
-};
-
-export type CnhFullListOptions = CnhListOptions & {
-  expand?: CnhExpand;
-  batch?: number;
-};
-
-export type CnhRecordOptions = CnhCommonOptions & {
-  expand?: CnhExpand;
-};
-
-export type CnhRecordListOptions = unknown
-  & CnhRecordOptions
-  & CnhListOptions
-  & {
-    page?: number;
-    perPage?: number;
-  }
-;
-
-export type CnhRecordFullListOptions =
-  & CnhFullListOptions
-  & CnhRecordOptions
-;
-
-export function parseCnh(record: SerializedCnh): Cnh {
-  return {
-    ...record,
-    created: parseISO(record.created),
-    updated: parseISO(record.updated),
-    expand: record.expand && {
-      driver: record.expand.driver
-        ? record.expand.driver.map(parseDriver)
-        : undefined
-      ,
-    },
-  };
-}
-
-export function serializeCnh(record: Cnh): SerializedCnh {
-  return {
-    ...record,
-    created: formatISO(record.created),
-    updated: formatISO(record.updated),
-    expand: record.expand && {
-      driver: record.expand.driver
-        ? record.expand.driver.map(serializeDriver)
-        : undefined
-      ,
-    },
-  };
-}
-
-export function serializeCreateCnh(record: CreateCnh): SerializedCreateCnh {
-  return {
-    ...record,
-  };
-}
-
-export function serializeUpdateCnh(record: UpdateCnh): SerializedUpdateCnh {
-  return {
-    ...record,
-  };
-}
-
-export const cnhsApi = api.injectEndpoints({
-  endpoints: (build) => ({
-    getOneCnh: build.query<Cnh, string|({ id: string } & CnhRecordOptions)>({
-      queryFn: async (args) => {
-        try {
-          const id = typeof args === "string" ? args : args.id;
-
-          const options = typeof args === "string" ? [] : {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-
-          const data = await pb.collection("cnhs").getOne(id, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      providesTags: (result, error, args) => !result
-        ? []
-        : [{ type: "cnhs", id: typeof args === "string" ? args : args.id }]
-      ,
-    }),
-
-    getListCnhs: build.query<ListResult<Cnh>, CnhRecordListOptions|void>({
-      queryFn: async (args) => {
-        try {
-          const [page, perPage, options] = !args ? [] : [
-            args.page,
-            args.perPage,
-            {
-              ...args,
-              expand: getExpandString(args.expand),
-              fields: getFieldsString(args.fields),
-            },
-          ];
-
-          const data = await pb.collection("cnhs").getList(page, perPage, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      providesTags: (result, error, args) => !result
-        ? []
-        : [
-          { type: "cnhs", id: "LIST-cnhs" },
-          ...result.items.map((record) => ({ type: "cnhs", id: record.id } as const)),
-        ]
-      ,
-    }),
-
-    getFullListCnhs: build.query<Cnh[], CnhRecordFullListOptions|void>({
-      queryFn: async (args) => {
-        try {
-          const options = !args ? undefined : {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-
-          const data = await pb.collection("cnhs").getFullList(options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      providesTags: (result, error, args) => !result
-        ? []
-        : [
-          { type: "cnhs", id: "LIST-cnhs" },
-          ...result.map((record) => ({ type: "cnhs", id: record.id } as const)),
-        ]
-      ,
-    }),
-
-    createCnh: build.mutation<Cnh, { record: CreateCnh } & CnhRecordOptions>({
-      queryFn: async (args) => {
-        try {
-          const options = {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-          const serializedRecord = serializeCreateCnh(args.record);
-          const data = await pb.collection("cnhs").create(serializedRecord, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-    }),
-
-    updateCnh: build.mutation<Cnh, { record: UpdateCnh } & CnhRecordOptions>({
-      queryFn: async (args) => {
-        try {
-          const options = {
-            ...args,
-            expand: getExpandString(args.expand),
-            fields: getFieldsString(args.fields),
-          };
-          const serializedRecord = serializeUpdateCnh(args.record);
-          const data = await pb.collection("cnhs").update(args.record.id, serializedRecord, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      invalidatesTags: (result, error, args) => [
-        { type: "cnhs", id: args.record.id },
-      ],
-    }),
-
-    deleteCnh: build.mutation<boolean, string|({ id: string } & CnhCommonOptions)>({
-      queryFn: async (args) => {
-        try {
-          const id = typeof args === "string" ? args : args.id;
-          const options = typeof args === "string" ? undefined : {
-            ...args,
-            fields: getFieldsString(args.fields),
-          };
-          const data = await pb.collection("cnhs").delete(id, options);
-          return { data };
-        } catch (error: any) {
-          return { error };
-        }
-      },
-      invalidatesTags: (result, error, args) => [
-        { type: "cnhs", id: typeof args === "string" ? args : args.id },
-      ],
-    }),
-  }),
 });
 
 export type TestRecord = {
   id: string;
-  testGeo: { lat: number, lon: number };
-  createdAt: Date;
-  updatedAt: Date;
+  thisIsPlainText: string;
+  thisIsRichText: string;
+  thisIsEmail: string;
+  thisIsUrl: string;
+  thisIsNumber: number;
+  thisIsSingleRelation: string;
+  thisIsMultipleRelation: string[];
+  thisIsDateTime: Date;
+  thisIsBoolean: boolean;
+  thisIsJson: unknown;
+  thisIsSingleSelect: "somebody"|"once"|"told"|"me";
+  thisIsMultipleSelect: Array<"the"|"world"|"is"|"gonna"|"roll"|"me">;
+  thisIsSingleFile: string;
+  thisIsMultipleFile: string[];
+  thisIsAutoDate: Date;
+  thisIsGeoPoint: { lat: number, lon: number };
+  expand: {
+    thisIsSingleRelation?: TestRecord;
+    thisIsMultipleRelation?: TestRecord[];
+  };
 };
 
 export type SerializedTestRecord = {
   id: string;
-  testGeo: { lat: number, lon: number };
-  createdAt: string;
-  updatedAt: string;
+  thisIsPlainText: string;
+  thisIsRichText: string;
+  thisIsEmail: string;
+  thisIsUrl: string;
+  thisIsNumber: number;
+  thisIsSingleRelation: string;
+  thisIsMultipleRelation: string[];
+  thisIsDateTime: string;
+  thisIsBoolean: boolean;
+  thisIsJson: unknown;
+  thisIsSingleSelect: "somebody"|"once"|"told"|"me";
+  thisIsMultipleSelect: Array<"the"|"world"|"is"|"gonna"|"roll"|"me">;
+  thisIsSingleFile: string;
+  thisIsMultipleFile: string[];
+  thisIsAutoDate: string;
+  thisIsGeoPoint: { lat: number, lon: number };
+  expand: {
+    thisIsSingleRelation?: SerializedTestRecord;
+    thisIsMultipleRelation?: SerializedTestRecord[];
+  };
 };
 
 export type CreateTestRecord = {
-  testGeo: { lat: number, lon: number };
+  thisIsPlainText: string;
+  thisIsRichText: string;
+  thisIsEmail: string;
+  thisIsUrl: string;
+  thisIsNumber: number;
+  thisIsSingleRelation: string;
+  thisIsMultipleRelation: string[];
+  thisIsDateTime: Date;
+  thisIsBoolean: boolean;
+  thisIsJson: unknown;
+  thisIsSingleSelect: "somebody"|"once"|"told"|"me";
+  thisIsMultipleSelect: Array<"the"|"world"|"is"|"gonna"|"roll"|"me">;
+  thisIsSingleFile: File;
+  thisIsMultipleFile: File[];
+  thisIsGeoPoint: { lat: number, lon: number };
 };
 
 export type SerializedCreateTestRecord = {
-  testGeo: { lat: number, lon: number };
+  thisIsPlainText: string;
+  thisIsRichText: string;
+  thisIsEmail: string;
+  thisIsUrl: string;
+  thisIsNumber: number;
+  thisIsSingleRelation: string;
+  thisIsMultipleRelation: string[];
+  thisIsDateTime: string;
+  thisIsBoolean: boolean;
+  thisIsJson: unknown;
+  thisIsSingleSelect: "somebody"|"once"|"told"|"me";
+  thisIsMultipleSelect: Array<"the"|"world"|"is"|"gonna"|"roll"|"me">;
+  thisIsSingleFile: File|undefined|"";
+  thisIsMultipleFile: File[]|undefined|[];
+  thisIsGeoPoint: { lat: number, lon: number };
 };
 
 export type UpdateTestRecord = {
   id: string;
-  testGeo: { lat: number, lon: number };
+  thisIsPlainText: string;
+  thisIsRichText: string;
+  thisIsEmail: string;
+  thisIsUrl: string;
+  thisIsNumber: number;
+  thisIsSingleRelation: string;
+  thisIsMultipleRelation: string[];
+  thisIsDateTime: Date;
+  thisIsBoolean: boolean;
+  thisIsJson: unknown;
+  thisIsSingleSelect: "somebody"|"once"|"told"|"me";
+  thisIsMultipleSelect: Array<"the"|"world"|"is"|"gonna"|"roll"|"me">;
+  thisIsSingleFile: File;
+  thisIsMultipleFile: File[];
+  thisIsMultipleFileAppend?: File[];
+  thisIsMultipleFilePrepend?: File[];
+  thisIsMultipleFileRemove?: string[];
+  thisIsGeoPoint: { lat: number, lon: number };
 };
 
 export type SerializedUpdateTestRecord = {
   id: string;
-  testGeo: { lat: number, lon: number };
+  thisIsPlainText: string;
+  thisIsRichText: string;
+  thisIsEmail: string;
+  thisIsUrl: string;
+  thisIsNumber: number;
+  thisIsSingleRelation: string;
+  thisIsMultipleRelation: string[];
+  thisIsDateTime: string;
+  thisIsBoolean: boolean;
+  thisIsJson: unknown;
+  thisIsSingleSelect: "somebody"|"once"|"told"|"me";
+  thisIsMultipleSelect: Array<"the"|"world"|"is"|"gonna"|"roll"|"me">;
+  thisIsSingleFile: File|undefined|"";
+  thisIsMultipleFile: File[]|undefined|[];
+  "thisIsMultipleFile+"?: File[];
+  "+thisIsMultipleFile"?: File[];
+  "thisIsMultipleFile-"?: string[];
+  thisIsGeoPoint: { lat: number, lon: number };
 };
 
 export type TestRecordExpand = {
-  [key: string]: never;  
+  thisIsSingleRelation?: TestRecordExpand;
+  thisIsMultipleRelation?: TestRecordExpand;
 };
 
 export type TestRecordCommonOptions = {
-  fields?: Array<"id"|"testGeo"|"createdAt"|"updatedAt"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsRichText"|"thisIsEmail"|"thisIsUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestRecordListOptions = TestRecordCommonOptions & {
@@ -616,28 +189,53 @@ export type TestRecordRecordFullListOptions =
 export function parseTestRecord(record: SerializedTestRecord): TestRecord {
   return {
     ...record,
-    createdAt: parseISO(record.createdAt),
-    updatedAt: parseISO(record.updatedAt),
+    thisIsDateTime: parseISO(record.thisIsDateTime),
+    thisIsAutoDate: parseISO(record.thisIsAutoDate),
+    expand: record.expand && {
+      thisIsSingleRelation: record.expand.thisIsSingleRelation
+        ? parseTestRecord(record.expand.thisIsSingleRelation)
+        : undefined
+      ,
+      thisIsMultipleRelation: record.expand.thisIsMultipleRelation
+        ? record.expand.thisIsMultipleRelation.map(parseTestRecord)
+        : undefined
+      ,
+    },
   };
 }
 
 export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
   return {
     ...record,
-    createdAt: formatISO(record.createdAt),
-    updatedAt: formatISO(record.updatedAt),
+    thisIsDateTime: formatISO(record.thisIsDateTime),
+    thisIsAutoDate: formatISO(record.thisIsAutoDate),
+    expand: record.expand && {
+      thisIsSingleRelation: record.expand.thisIsSingleRelation
+        ? serializeTestRecord(record.expand.thisIsSingleRelation)
+        : undefined
+      ,
+      thisIsMultipleRelation: record.expand.thisIsMultipleRelation
+        ? record.expand.thisIsMultipleRelation.map(serializeTestRecord)
+        : undefined
+      ,
+    },
   };
 }
 
 export function serializeCreateTestRecord(record: CreateTestRecord): SerializedCreateTestRecord {
   return {
     ...record,
+    thisIsDateTime: formatISO(record.thisIsDateTime),
   };
 }
 
 export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedUpdateTestRecord {
   return {
     ...record,
+    thisIsDateTime: formatISO(record.thisIsDateTime),
+    "thisIsMultipleFile+": record.thisIsMultipleFileAppend,
+    "+thisIsMultipleFile": record.thisIsMultipleFilePrepend,
+    "thisIsMultipleFile-": record.thisIsMultipleFileRemove,
   };
 }
 
@@ -654,7 +252,7 @@ export const testRecordsApi = api.injectEndpoints({
             fields: getFieldsString(args.fields),
           };
 
-          const data = await pb.collection("testCollection").getOne(id, options);
+          const data = await pb.collection("testRecords").getOne(id, options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -662,7 +260,7 @@ export const testRecordsApi = api.injectEndpoints({
       },
       providesTags: (result, error, args) => !result
         ? []
-        : [{ type: "testCollection", id: typeof args === "string" ? args : args.id }]
+        : [{ type: "testRecords", id: typeof args === "string" ? args : args.id }]
       ,
     }),
 
@@ -679,7 +277,7 @@ export const testRecordsApi = api.injectEndpoints({
             },
           ];
 
-          const data = await pb.collection("testCollection").getList(page, perPage, options);
+          const data = await pb.collection("testRecords").getList(page, perPage, options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -688,8 +286,8 @@ export const testRecordsApi = api.injectEndpoints({
       providesTags: (result, error, args) => !result
         ? []
         : [
-          { type: "testCollection", id: "LIST-testRecords" },
-          ...result.items.map((record) => ({ type: "testCollection", id: record.id } as const)),
+          { type: "testRecords", id: "LIST-testRecords" },
+          ...result.items.map((record) => ({ type: "testRecords", id: record.id } as const)),
         ]
       ,
     }),
@@ -703,7 +301,7 @@ export const testRecordsApi = api.injectEndpoints({
             fields: getFieldsString(args.fields),
           };
 
-          const data = await pb.collection("testCollection").getFullList(options);
+          const data = await pb.collection("testRecords").getFullList(options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -712,8 +310,8 @@ export const testRecordsApi = api.injectEndpoints({
       providesTags: (result, error, args) => !result
         ? []
         : [
-          { type: "testCollection", id: "LIST-testRecords" },
-          ...result.map((record) => ({ type: "testCollection", id: record.id } as const)),
+          { type: "testRecords", id: "LIST-testRecords" },
+          ...result.map((record) => ({ type: "testRecords", id: record.id } as const)),
         ]
       ,
     }),
@@ -727,7 +325,7 @@ export const testRecordsApi = api.injectEndpoints({
             fields: getFieldsString(args.fields),
           };
           const serializedRecord = serializeCreateTestRecord(args.record);
-          const data = await pb.collection("testCollection").create(serializedRecord, options);
+          const data = await pb.collection("testRecords").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
           return { error };
@@ -744,14 +342,14 @@ export const testRecordsApi = api.injectEndpoints({
             fields: getFieldsString(args.fields),
           };
           const serializedRecord = serializeUpdateTestRecord(args.record);
-          const data = await pb.collection("testCollection").update(args.record.id, serializedRecord, options);
+          const data = await pb.collection("testRecords").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
           return { error };
         }
       },
       invalidatesTags: (result, error, args) => [
-        { type: "testCollection", id: args.record.id },
+        { type: "testRecords", id: args.record.id },
       ],
     }),
 
@@ -763,14 +361,14 @@ export const testRecordsApi = api.injectEndpoints({
             ...args,
             fields: getFieldsString(args.fields),
           };
-          const data = await pb.collection("testCollection").delete(id, options);
+          const data = await pb.collection("testRecords").delete(id, options);
           return { data };
         } catch (error: any) {
           return { error };
         }
       },
       invalidatesTags: (result, error, args) => [
-        { type: "testCollection", id: typeof args === "string" ? args : args.id },
+        { type: "testRecords", id: typeof args === "string" ? args : args.id },
       ],
     }),
   }),

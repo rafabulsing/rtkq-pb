@@ -23,11 +23,33 @@ abstract class Field {
   getCreateSerializedType(): string {
     return this.getSerializedType();
   }
+
   getUpdateParsedType(): string {
     return this.getParsedType();
   }
   getUpdateSerializedType(): string {
     return this.getSerializedType();
+  }
+
+  getParsed(): string {
+    return `${this.name}: ${this.getParsedType()};`;
+  }
+  getSerialized(): string {
+    return `${this.name}: ${this.getSerializedType()};`;
+  }
+
+  getCreateParsed(): string|null {
+    return `${this.name}: ${this.getCreateParsedType()};`;
+  }
+  getCreateSerialized(): string|null {
+    return `${this.name}: ${this.getUpdateSerializedType()};`;
+  }
+
+  getUpdateParsed(): string|null {
+    return `${this.name}: ${this.getCreateParsedType()};`;
+  }
+  getUpdateSerialized(): string|null {
+    return `${this.name}: ${this.getUpdateSerializedType()};`;
   }
   
   getParser(): string|null {
@@ -35,6 +57,18 @@ abstract class Field {
   }
   getSerializer(): string|null {
     return null;
+  }
+  getCreateParser(): string|null {
+    return this.getParser();
+  }
+  getCreateSerializer(): string|null {
+    return this.getSerializer();
+  }
+  getUpdateParser(): string|null {
+    return this.getParser();
+  }
+  getUpdateSerializer(): string|null {
+    return this.getSerializer();
   }
   constructor(field: UnknownField) {
     this.name = field.name;
@@ -221,11 +255,11 @@ class DateTimeField extends Field {
   }
 
   getParser(): string | null {
-    return `parseISO(record.${this.name})`;
+    return `${this.name}: parseISO(record.${this.name}),`;
   }
 
   getSerializer(): string | null {
-    return `formatISO(record.${this.name})`;
+    return `${this.name}: formatISO(record.${this.name}),`;
   }
 }
 
@@ -245,11 +279,40 @@ class AutoDateTimeField extends Field {
   }
 
   getParser(): string | null {
-    return `parseISO(record.${this.name})`;
+    return `${this.name}: parseISO(record.${this.name}),`;
   }
 
   getSerializer(): string | null {
-    return `formatISO(record.${this.name})`;
+    return `${this.name}: formatISO(record.${this.name}),`;
+  }
+
+  getCreateParser(): string|null {
+    return null;
+  }
+  getCreateSerializer(): string|null {
+    return null;
+  }
+  getUpdateParser(): string|null {
+    return null;
+  }
+  getUpdateSerializer(): string|null {
+    return null;
+  }
+
+  getCreateParsed(): string|null {
+    return null;
+  }
+
+  getCreateSerialized(): string|null {
+    return null;
+  }
+
+  getUpdateParsed(): string|null {
+    return null;
+  }
+
+  getUpdateSerialized(): string|null {
+    return null;
   }
 }
 
@@ -406,6 +469,26 @@ class FileField extends Field {
       : "File[]|undefined|[]"
     ;
   }
+
+  getUpdateParsed(): string {
+    return this.mode === "single"
+      ? super.getUpdateParsed()!
+      : super.getUpdateParsed() + `
+  ${this.name}Append?: File[];
+  ${this.name}Prepend?: File[];
+  ${this.name}Remove?: string[];`
+    ;
+  }
+
+  getUpdateSerialized(): string {
+    return this.mode === "single"
+      ? super.getUpdateSerialized()!
+      : super.getUpdateSerialized() + `
+  "${this.name}+"?: File[];
+  "+${this.name}"?: File[];
+  "${this.name}-"?: string[];`
+    ;
+  }
 }
 
 class GeoPointField extends Field {
@@ -441,8 +524,6 @@ const fieldClassesMap = Object.fromEntries(
   fieldClasses.map((fieldType) => [fieldType.type, fieldType]),
 );
 
-// TODO: GeoPoint
-
 // TODO: deal with optional files
 
 // TODO: wrapper hook that parses dates
@@ -471,17 +552,21 @@ export function schemaToTypes(inputFilePath: string, outputFilePath: string) {
           pluralUpperCase: upperCaseFirstChar(c.plural),
           fields: fields.map((f) => ({
             name: f.name,
-            parsedType: f.getParsedType(),
-            serializedType: f.getSerializedType(),
-            createParsedType: f.getCreateParsedType(),
-            createSerializedType: f.getCreateSerializedType(),
-            updateParsedType: f.getUpdateParsedType(),
-            updateSerializedType: f.getUpdateSerializedType(),
+            parsed: f.getParsed(),
+            serialized: f.getSerialized(),
+            createParsed: f.getCreateParsed(),
+            createSerialized: f.getCreateSerialized(),
+            updateParsed: f.getUpdateParsed(),
+            updateSerialized: f.getUpdateSerialized(),
             isFile: f instanceof FileField,
             isMultiple: "mode" in f && f.mode === "multiple",
             isAuto: f instanceof AutoDateTimeField,
             parser: f.getParser(),
             serializer: f.getSerializer(),
+            createParser: f.getCreateParser(),
+            createSerializer: f.getCreateSerializer(),
+            updateParser: f.getUpdateParser(),
+            updateSerializer: f.getUpdateSerializer(),
           })),
           includeExpand: fields.some((f) => f instanceof RelationField),
           expand: fields
@@ -514,4 +599,3 @@ function upperCaseFirstChar(str: string): string {
 
   return str[0]!.toUpperCase() + str.slice(1);
 }
-

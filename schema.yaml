@@ -1,75 +1,72 @@
 collections:
-  - name: "drivers"
-    singular: "driver"
-    plural: "drivers"
-    properties:
-      - name: "fullName"
-        type: "plainText"
-
-      - name: "email"
-        type: "plainText"
-
-      - name: "avatar"
-        type: "file"
-        mode: "single"
-
-      - name: "deleted"
-        type: "datetime"
-
-      - name: "created"
-        type: "autoDatetime"
-
-      - name: "updated"
-        type: "autoDatetime"
-
-  - name: "cnhs"
-    singular: "cnh"
-    plural: "cnhs"
-    properties:
-      - name: "driver"
-        type: "relation"
-        to: "drivers"
-        mode: "multiple"
-      
-      - name: "number"
-        type: "plainText"
-
-      - name: "categories"
-        type: "select"
-        mode: "multiple"
-        options:
-          - "acc"
-          - "a"
-          - "b"
-          - "c"
-          - "d"
-          - "e"
-      
-      - name: "created"
-        type: "autoDatetime"
-
-      - name: "updated"
-        type: "autoDatetime"
-
-  - name: "testCollection"
+  - name: "testRecords"
     singular: "testRecord"
     plural: "testRecords"
     properties:
-      - name: "testGeo"
-        type: "geoPoint"
-      - name: "createdAt"
-        type: "autoDatetime"
-      - name: "updatedAt"
+      - name: "thisIsPlainText"
+        type: "plainText"
+      
+      - name: "thisIsRichText"
+        type: "richText"
+
+      - name: "thisIsEmail"
+        type: "email"
+
+      - name: "thisIsUrl"
+        type: "url"
+      
+      - name: "thisIsNumber"
+        type: "number"
+      
+      - name: "thisIsSingleRelation"
+        type: "relation"
+        to: "testRecords"
+        mode: "single"
+        
+      - name: "thisIsMultipleRelation"
+        type: "relation"
+        to: "testRecords"
+        mode: "multiple"
+      
+      - name: "thisIsDateTime"
+        type: "datetime"
+      
+      - name: "thisIsBoolean"
+        type: "boolean"
+      
+      - name: "thisIsJson"
+        type: "json"
+
+      - name: "thisIsSingleSelect"
+        type: "select"
+        mode: "single"
+        options:
+          - "somebody"
+          - "once"
+          - "told"
+          - "me"
+      
+      - name: "thisIsMultipleSelect"
+        type: "select"
+        mode: "multiple"
+        options:
+          - "the"
+          - "world"
+          - "is"
+          - "gonna"
+          - "roll"
+          - "me"
+        
+      - name: "thisIsSingleFile"
+        type: "file"
+        mode: "single"
+        
+      - name: "thisIsMultipleFile"
+        type: "file"
+        mode: "multiple"
+
+      - name: "thisIsAutoDate"
         type: "autoDatetime"
 
-  # - name: "vehicles"
-  #   singular: "vehicle"
-  #   plural: "vehicles"
-  #   properties:
-  #     - name: "plate"
-  #       type: "string"
-  #     - name: "model"
-  #       type: "string"
-  #     - name: "driver"
-  #       type: "relation"
-  #       to:   "drivers"
+      - name: "thisIsGeoPoint"
+        type: "geoPoint"
