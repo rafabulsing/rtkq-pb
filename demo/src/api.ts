@@ -8,6 +8,12 @@ export interface TypedPockedBase extends PocketBase {
   collection(idOrName: "testRecords"): RecordService<TestRecord>;
 }
 
+type TagType = never
+  | "testRecords"
+;
+
+type Tag = { type: TagType; id: string };
+
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
 
 export const api = createApi({
@@ -250,6 +256,15 @@ export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedU
   };
 }
 
+function getTagsForTestRecord(record: TestRecord): Tag[] {
+  return ([
+    { type: "testRecords", id: record.id },
+    ...(!record.expand.thisIsSingleRelation ? [] : getTagsForTestRecord(record.expand.thisIsSingleRelation)),
+    record.expand.thisIsMultipleRelation && { type: "testRecords", id: `LIST-testRecord-${record.id}` } as const,
+    ...(record.expand.thisIsMultipleRelation ?? []).map((e) => getTagsForTestRecord(e)).flat(),
+  ] as const).filter((t) => !!t);
+}
+
 export const testRecordsApi = api.injectEndpoints({
   endpoints: (build) => ({
     getOneTestRecord: build.query<TestRecord, string|({ id: string } & TestRecordRecordOptions)>({
@@ -271,7 +286,7 @@ export const testRecordsApi = api.injectEndpoints({
       },
       providesTags: (result, error, args) => !result
         ? []
-        : [{ type: "testRecords", id: typeof args === "string" ? args : args.id }]
+        : getTagsForTestRecord(result)
       ,
     }),
 
@@ -298,7 +313,7 @@ export const testRecordsApi = api.injectEndpoints({
         ? []
         : [
           { type: "testRecords", id: "LIST-testRecords" },
-          ...result.items.map((record) => ({ type: "testRecords", id: record.id } as const)),
+          ...result.items.map((record) => getTagsForTestRecord(record)).flat(),
         ]
       ,
     }),
@@ -322,7 +337,7 @@ export const testRecordsApi = api.injectEndpoints({
         ? []
         : [
           { type: "testRecords", id: "LIST-testRecords" },
-          ...result.map((record) => ({ type: "testRecords", id: record.id } as const)),
+          ...result.map((record) => getTagsForTestRecord(record)).flat(),
         ]
       ,
     }),
@@ -342,6 +357,10 @@ export const testRecordsApi = api.injectEndpoints({
           return { error };
         }
       },
+      invalidatesTags: (result, error, args) => !result
+        ? []
+        : [{ type: "testRecords", id: `LIST-testRecords` }]
+      ,
     }),
 
     updateTestRecord: build.mutation<TestRecord, { record: UpdateTestRecord } & TestRecordRecordOptions>({

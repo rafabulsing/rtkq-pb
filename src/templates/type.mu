@@ -10,6 +10,14 @@ export interface TypedPockedBase extends PocketBase {
   {{/collections}}
 }
 
+type TagType = never
+  {{#collections}}
+  | "{{name}}"
+  {{/collections}}
+;
+
+type Tag = { type: TagType; id: string };
+
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
 
 export const api = createApi({
@@ -210,6 +218,21 @@ export function serializeUpdate{{singularUpperCase}}(record: Update{{singularUpp
   };
 }
 
+function getTagsFor{{singularUpperCase}}(record: {{singularUpperCase}}): Tag[] {
+  return ([
+    { type: "{{name}}", id: record.id },
+    {{#expand}}
+    {{#isMultiple}}
+    record.expand.{{name}} && { type: "{{resolvedToCollection}}", id: `LIST-{{collection}}-${record.id}` } as const,
+    ...(record.expand.{{name}} ?? []).map((e) => getTagsFor{{resolvedTo}}(e)).flat(),
+    {{/isMultiple}}
+    {{^isMultiple}}
+    ...(!record.expand.{{name}} ? [] : getTagsFor{{resolvedTo}}(record.expand.{{name}})),
+    {{/isMultiple}}
+    {{/expand}}
+  ] as const).filter((t) => !!t);
+}
+
 export const {{plural}}Api = api.injectEndpoints({
   endpoints: (build) => ({
     getOne{{singularUpperCase}}: build.query<{{singularUpperCase}}, string|({ id: string } & {{singularUpperCase}}RecordOptions)>({
@@ -231,7 +254,7 @@ export const {{plural}}Api = api.injectEndpoints({
       },
       providesTags: (result, error, args) => !result
         ? []
-        : [{ type: "{{name}}", id: typeof args === "string" ? args : args.id }]
+        : getTagsFor{{singularUpperCase}}(result)
       ,
     }),
 
@@ -258,7 +281,7 @@ export const {{plural}}Api = api.injectEndpoints({
         ? []
         : [
           { type: "{{name}}", id: "LIST-{{plural}}" },
-          ...result.items.map((record) => ({ type: "{{name}}", id: record.id } as const)),
+          ...result.items.map((record) => getTagsFor{{singularUpperCase}}(record)).flat(),
         ]
       ,
     }),
@@ -282,7 +305,7 @@ export const {{plural}}Api = api.injectEndpoints({
         ? []
         : [
           { type: "{{name}}", id: "LIST-{{plural}}" },
-          ...result.map((record) => ({ type: "{{name}}", id: record.id } as const)),
+          ...result.map((record) => getTagsFor{{singularUpperCase}}(record)).flat(),
         ]
       ,
     }),
@@ -302,6 +325,10 @@ export const {{plural}}Api = api.injectEndpoints({
           return { error };
         }
       },
+      invalidatesTags: (result, error, args) => !result
+        ? []
+        : [{ type: "{{name}}", id: `LIST-{{plural}}` }]
+      ,
     }),
 
     update{{singularUpperCase}}: build.mutation<{{singularUpperCase}}, { record: Update{{singularUpperCase}} } & {{singularUpperCase}}RecordOptions>({

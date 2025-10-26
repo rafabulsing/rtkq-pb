@@ -530,6 +530,8 @@ const fieldClassesMap = Object.fromEntries(
 
 // TODO: wrapper that typechecks extends
 
+// TODO: handle tag invalidation for back relations
+
 export function schemaToTypes(inputFilePath: string, outputFilePath: string) {
   const file = fs.readFileSync(inputFilePath, "utf-8");
   const parsed = yaml.parse(file) as { collections: Collection[] };
@@ -581,6 +583,8 @@ export function schemaToTypes(inputFilePath: string, outputFilePath: string) {
               return {
                 name: f.name,
                 resolvedTo: upperCaseFirstChar(resolvedTo.singular),
+                resolvedToCollection: resolvedTo.name,
+                collection: c.singular,
                 isMultiple: f.mode === "multiple",
               };
             })
