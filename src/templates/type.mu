@@ -94,6 +94,18 @@ export type {{singularUpperCase}}Expand = {
   {{/expand}}
 };
 
+export type Resolved{{singularUpperCase}}Expand<T extends {{singularUpperCase}}Expand> = {
+  {{#expand}}
+  {{name}}?: undefined extends T['{{name}}']
+    ? never
+    : {{#isMultiple}}({{singularUpperCase}} & { expand: Resolved{{singularUpperCase}}Expand<NonNullable<T['{{name}}']>> })[]{{/isMultiple}}{{^isMultiple}}{{singularUpperCase}} & { expand: Resolved{{singularUpperCase}}Expand<NonNullable<T['{{name}}']>> }{{/isMultiple}}
+  ;
+  {{/expand}}
+  {{^expand}}
+  [key: string]: never;  
+  {{/expand}}
+};
+
 export type {{singularUpperCase}}CommonOptions = {
   fields?: Array<"id"|{{#fields}}"{{name}}"|{{/fields}}"created"|"updated">;
 };

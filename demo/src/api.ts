@@ -151,6 +151,17 @@ export type TestRecordExpand = {
   thisIsMultipleRelation?: TestRecordExpand;
 };
 
+export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
+  thisIsSingleRelation?: undefined extends T['thisIsSingleRelation']
+    ? never
+    : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T['thisIsSingleRelation']>> }
+  ;
+  thisIsMultipleRelation?: undefined extends T['thisIsMultipleRelation']
+    ? never
+    : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T['thisIsMultipleRelation']>> })[]
+  ;
+};
+
 export type TestRecordCommonOptions = {
   fields?: Array<"id"|"thisIsPlainText"|"thisIsRichText"|"thisIsEmail"|"thisIsUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
