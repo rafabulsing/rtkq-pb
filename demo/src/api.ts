@@ -522,6 +522,30 @@ export const testRecordsApi = {
       }),
     });
   },
+
+  useCreateTestRecordMutation: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useCreateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useCreateTestRecordMutation({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parseTestRecord(result.data) as TestRecord,
+      }),
+    });
+  },
+
+  useUpdateTestRecordMutation: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useUpdateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useUpdateTestRecordMutation({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parseTestRecord(result.data) as TestRecord,
+      }),
+    });
+  },
 }
 
 export type Expand = { [property: string]: Expand };

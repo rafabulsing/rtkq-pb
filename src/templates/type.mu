@@ -490,6 +490,30 @@ export const {{plural}}Api = {
       }),
     });
   },
+
+  useCreate{{singularUpperCase}}Mutation: function<T extends {{singularUpperCase}}Expand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useCreate{{singularUpperCase}}Mutation>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useCreate{{singularUpperCase}}Mutation({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parse{{singularUpperCase}}(result.data) as {{singularUpperCase}},
+      }),
+    });
+  },
+
+  useUpdate{{singularUpperCase}}Mutation: function<T extends {{singularUpperCase}}Expand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useUpdate{{singularUpperCase}}Mutation>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useUpdate{{singularUpperCase}}Mutation({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parse{{singularUpperCase}}(result.data) as {{singularUpperCase}},
+      }),
+    });
+  },
 }
 
 {{/collections}}
