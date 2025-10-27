@@ -1,11 +1,11 @@
 import PocketBase, { RecordService, ListResult } from "pocketbase";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, TypedUseQueryStateResult } from "@reduxjs/toolkit/query/react";
 import { parseISO, formatISO } from "date-fns";
 
 export interface TypedPockedBase extends PocketBase {
   collection(idOrName: string): RecordService<never>;
-  collection(idOrName: "testRecords"): RecordService<TestRecord>;
+  collection(idOrName: "testRecords"): RecordService<SerializedTestRecord>;
 }
 
 type TagType = never
@@ -158,11 +158,11 @@ export type TestRecordExpand = {
 };
 
 export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
-  thisIsSingleRelation?: undefined extends T['thisIsSingleRelation']
+  thisIsSingleRelation: undefined extends T['thisIsSingleRelation']
     ? never
     : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T['thisIsSingleRelation']>> }
   ;
-  thisIsMultipleRelation?: undefined extends T['thisIsMultipleRelation']
+  thisIsMultipleRelation: undefined extends T['thisIsMultipleRelation']
     ? never
     : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T['thisIsMultipleRelation']>> })[]
   ;
@@ -256,7 +256,7 @@ export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedU
   };
 }
 
-function getTagsForTestRecord(record: TestRecord): Tag[] {
+function getTagsForTestRecord(record: SerializedTestRecord): Tag[] {
   return ([
     { type: "testRecords", id: record.id },
     ...(!record.expand.thisIsSingleRelation ? [] : getTagsForTestRecord(record.expand.thisIsSingleRelation)),
@@ -265,9 +265,9 @@ function getTagsForTestRecord(record: TestRecord): Tag[] {
   ] as const).filter((t) => !!t);
 }
 
-export const testRecordsApi = api.injectEndpoints({
+export const testRecordsApiInternal = api.injectEndpoints({
   endpoints: (build) => ({
-    getOneTestRecord: build.query<TestRecord, string|({ id: string } & TestRecordRecordOptions)>({
+    getOneTestRecord: build.query<SerializedTestRecord, string|({ id: string } & TestRecordRecordOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -290,7 +290,7 @@ export const testRecordsApi = api.injectEndpoints({
       ,
     }),
 
-    getListTestRecords: build.query<ListResult<TestRecord>, TestRecordRecordListOptions|void>({
+    getListTestRecords: build.query<ListResult<SerializedTestRecord>, TestRecordRecordListOptions|void>({
       queryFn: async (args) => {
         try {
           const [page, perPage, options] = !args ? [] : [
@@ -318,7 +318,7 @@ export const testRecordsApi = api.injectEndpoints({
       ,
     }),
 
-    getFullListTestRecords: build.query<TestRecord[], TestRecordRecordFullListOptions|void>({
+    getFullListTestRecords: build.query<SerializedTestRecord[], TestRecordRecordFullListOptions|void>({
       queryFn: async (args) => {
         try {
           const options = !args ? undefined : {
@@ -342,7 +342,7 @@ export const testRecordsApi = api.injectEndpoints({
       ,
     }),
 
-    createTestRecord: build.mutation<TestRecord, { record: CreateTestRecord } & TestRecordRecordOptions>({
+    createTestRecord: build.mutation<SerializedTestRecord, { record: CreateTestRecord } & TestRecordRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -363,7 +363,7 @@ export const testRecordsApi = api.injectEndpoints({
       ,
     }),
 
-    updateTestRecord: build.mutation<TestRecord, { record: UpdateTestRecord } & TestRecordRecordOptions>({
+    updateTestRecord: build.mutation<SerializedTestRecord, { record: UpdateTestRecord } & TestRecordRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -403,6 +403,69 @@ export const testRecordsApi = api.injectEndpoints({
     }),
   }),
 });
+
+export const testRecordsApi = {
+  ...testRecordsApiInternal,
+  useGetOneTestRecordQuery: function<T extends TestRecordExpand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[1], "selectFromResult"> & { selectFromResult: undefined }
+  ) {
+    return testRecordsApiInternal.useGetOneTestRecordQuery(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parseTestRecord(result.data) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        },
+        currentData: result.currentData && parseTestRecord(result.currentData) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        },
+      }),
+    });
+  },
+
+  useGetListTestRecordsQuery: function<T extends TestRecordExpand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult: undefined }
+  ) {
+    return testRecordsApiInternal.useGetListTestRecordsQuery(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && {
+          ...result.data,
+          items: result.data.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
+          }>,
+        },
+        currentData: result.currentData && {
+          ...result.currentData,
+          items: result.currentData.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
+          }>,
+        },
+      }),
+    });
+  },
+
+  useGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult: undefined }
+  ) {
+    return testRecordsApiInternal.useGetFullListTestRecordsQuery(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        }>,
+        currentData: result.currentData?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        }>,
+      }),
+    });
+  },
+}
 
 export type Expand = { [property: string]: Expand };
 

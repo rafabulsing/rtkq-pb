@@ -530,6 +530,8 @@ const fieldClassesMap = Object.fromEntries(
 
 // TODO: wrapper that typechecks extends
 
+// TODO: typecheck error in wrapper hooks
+
 // TODO: handle tag invalidation for back relations
 
 export function schemaToTypes(inputFilePath: string, outputFilePath: string) {

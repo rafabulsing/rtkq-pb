@@ -1,12 +1,12 @@
 import PocketBase, { RecordService, ListResult } from "pocketbase";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, TypedUseQueryStateResult } from "@reduxjs/toolkit/query/react";
 import { parseISO, formatISO } from "date-fns";
 
 export interface TypedPockedBase extends PocketBase {
   collection(idOrName: string): RecordService<never>;
   {{#collections}}
-  collection(idOrName: "{{name}}"): RecordService<{{singularUpperCase}}>;
+  collection(idOrName: "{{name}}"): RecordService<Serialized{{singularUpperCase}}>;
   {{/collections}}
 }
 
@@ -104,7 +104,7 @@ export type {{singularUpperCase}}Expand = {
 
 export type Resolved{{singularUpperCase}}Expand<T extends {{singularUpperCase}}Expand> = {
   {{#expand}}
-  {{name}}?: undefined extends T['{{name}}']
+  {{name}}: undefined extends T['{{name}}']
     ? never
     : {{#isMultiple}}({{singularUpperCase}} & { expand: Resolved{{singularUpperCase}}Expand<NonNullable<T['{{name}}']>> })[]{{/isMultiple}}{{^isMultiple}}{{singularUpperCase}} & { expand: Resolved{{singularUpperCase}}Expand<NonNullable<T['{{name}}']>> }{{/isMultiple}}
   ;
@@ -218,7 +218,7 @@ export function serializeUpdate{{singularUpperCase}}(record: Update{{singularUpp
   };
 }
 
-function getTagsFor{{singularUpperCase}}(record: {{singularUpperCase}}): Tag[] {
+function getTagsFor{{singularUpperCase}}(record: Serialized{{singularUpperCase}}): Tag[] {
   return ([
     { type: "{{name}}", id: record.id },
     {{#expand}}
@@ -233,9 +233,9 @@ function getTagsFor{{singularUpperCase}}(record: {{singularUpperCase}}): Tag[] {
   ] as const).filter((t) => !!t);
 }
 
-export const {{plural}}Api = api.injectEndpoints({
+export const {{plural}}ApiInternal = api.injectEndpoints({
   endpoints: (build) => ({
-    getOne{{singularUpperCase}}: build.query<{{singularUpperCase}}, string|({ id: string } & {{singularUpperCase}}RecordOptions)>({
+    getOne{{singularUpperCase}}: build.query<Serialized{{singularUpperCase}}, string|({ id: string } & {{singularUpperCase}}RecordOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -258,7 +258,7 @@ export const {{plural}}Api = api.injectEndpoints({
       ,
     }),
 
-    getList{{pluralUpperCase}}: build.query<ListResult<{{singularUpperCase}}>, {{singularUpperCase}}RecordListOptions|void>({
+    getList{{pluralUpperCase}}: build.query<ListResult<Serialized{{singularUpperCase}}>, {{singularUpperCase}}RecordListOptions|void>({
       queryFn: async (args) => {
         try {
           const [page, perPage, options] = !args ? [] : [
@@ -286,7 +286,7 @@ export const {{plural}}Api = api.injectEndpoints({
       ,
     }),
 
-    getFullList{{pluralUpperCase}}: build.query<{{singularUpperCase}}[], {{singularUpperCase}}RecordFullListOptions|void>({
+    getFullList{{pluralUpperCase}}: build.query<Serialized{{singularUpperCase}}[], {{singularUpperCase}}RecordFullListOptions|void>({
       queryFn: async (args) => {
         try {
           const options = !args ? undefined : {
@@ -310,7 +310,7 @@ export const {{plural}}Api = api.injectEndpoints({
       ,
     }),
 
-    create{{singularUpperCase}}: build.mutation<{{singularUpperCase}}, { record: Create{{singularUpperCase}} } & {{singularUpperCase}}RecordOptions>({
+    create{{singularUpperCase}}: build.mutation<Serialized{{singularUpperCase}}, { record: Create{{singularUpperCase}} } & {{singularUpperCase}}RecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -331,7 +331,7 @@ export const {{plural}}Api = api.injectEndpoints({
       ,
     }),
 
-    update{{singularUpperCase}}: build.mutation<{{singularUpperCase}}, { record: Update{{singularUpperCase}} } & {{singularUpperCase}}RecordOptions>({
+    update{{singularUpperCase}}: build.mutation<Serialized{{singularUpperCase}}, { record: Update{{singularUpperCase}} } & {{singularUpperCase}}RecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -371,6 +371,69 @@ export const {{plural}}Api = api.injectEndpoints({
     }),
   }),
 });
+
+export const {{plural}}Api = {
+  ...{{plural}}ApiInternal,
+  useGetOne{{singularUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetOne{{singularUpperCase}}Query>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOne{{singularUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult: undefined }
+  ) {
+    return testRecordsApiInternal.useGetOne{{singularUpperCase}}Query(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parse{{singularUpperCase}}(result.data) as {{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        },
+        currentData: result.currentData && parse{{singularUpperCase}}(result.currentData) as {{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        },
+      }),
+    });
+  },
+
+  useGetList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetList{{pluralUpperCase}}Query>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult: undefined }
+  ) {
+    return testRecordsApiInternal.useGetList{{pluralUpperCase}}Query(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && {
+          ...result.data,
+          items: result.data.items.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+            expand: Resolved{{singularUpperCase}}Expand<T>,
+          }>,
+        },
+        currentData: result.currentData && {
+          ...result.currentData,
+          items: result.currentData.items.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+            expand: Resolved{{singularUpperCase}}Expand<T>,
+          }>,
+        },
+      }),
+    });
+  },
+
+  useGetFullList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult: undefined }
+  ) {
+    return testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data?.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        }>,
+        currentData: result.currentData?.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        }>,
+      }),
+    });
+  },
+}
 
 {{/collections}}
 export type Expand = { [property: string]: Expand };
