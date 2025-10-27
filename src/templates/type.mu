@@ -376,7 +376,7 @@ export const {{plural}}Api = {
   ...{{plural}}ApiInternal,
   useGetOne{{singularUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
     args: Parameters<typeof testRecordsApiInternal.useGetOne{{singularUpperCase}}Query>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOne{{singularUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOne{{singularUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined }
   ) {
     return testRecordsApiInternal.useGetOne{{singularUpperCase}}Query(args, {
       ...options,
@@ -392,9 +392,26 @@ export const {{plural}}Api = {
     });
   },
 
+  useLazyGetOne{{singularUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetOne{{singularUpperCase}}Query>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useLazyGetOne{{singularUpperCase}}Query({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parse{{singularUpperCase}}(result.data) as {{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        },
+        currentData: result.currentData && parse{{singularUpperCase}}(result.currentData) as {{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        },
+      }),
+    });
+  },
+
   useGetList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
     args: Parameters<typeof testRecordsApiInternal.useGetList{{pluralUpperCase}}Query>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined }
   ) {
     return testRecordsApiInternal.useGetList{{pluralUpperCase}}Query(args, {
       ...options,
@@ -416,11 +433,51 @@ export const {{plural}}Api = {
     });
   },
 
+  useLazyGetList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetList{{pluralUpperCase}}Query>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useLazyGetList{{pluralUpperCase}}Query({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && {
+          ...result.data,
+          items: result.data.items.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+            expand: Resolved{{singularUpperCase}}Expand<T>,
+          }>,
+        },
+        currentData: result.currentData && {
+          ...result.currentData,
+          items: result.currentData.items.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+            expand: Resolved{{singularUpperCase}}Expand<T>,
+          }>,
+        },
+      }),
+    });
+  },
+
   useGetFullList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
     args: Parameters<typeof testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined }
   ) {
     return testRecordsApiInternal.useGetFullList{{pluralUpperCase}}Query(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data?.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        }>,
+        currentData: result.currentData?.map(parse{{singularUpperCase}}) as Array<{{singularUpperCase}} & {
+          expand: Resolved{{singularUpperCase}}Expand<T>,
+        }>,
+      }),
+    });
+  },
+
+  useLazyGetFullList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetFullList{{pluralUpperCase}}Query>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useLazyGetFullList{{pluralUpperCase}}Query({
       ...options,
       selectFromResult: (result) => ({
         ...result,

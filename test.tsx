@@ -30,7 +30,8 @@ function useGetOneTestRecordQuery<T extends TestRecordExpand>(
 }
 
 function test() {
-  const query = testRecordsApi.useGetListTestRecordsQuery({ expand: { thisIsMultipleRelation: { thisIsSingleRelation: {}}}});
+  const query = testRecordsApi.useGetListTestRecordsQuery({
+    expand: { thisIsMultipleRelation: { thisIsSingleRelation: {}}},
+  }, {});
 
-  query.data?.items;
 }

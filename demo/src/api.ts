@@ -408,7 +408,7 @@ export const testRecordsApi = {
   ...testRecordsApiInternal,
   useGetOneTestRecordQuery: function<T extends TestRecordExpand>(
     args: Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[1], "selectFromResult"> & { selectFromResult: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[1], "selectFromResult"> & { selectFromResult?: undefined }
   ) {
     return testRecordsApiInternal.useGetOneTestRecordQuery(args, {
       ...options,
@@ -424,9 +424,26 @@ export const testRecordsApi = {
     });
   },
 
+  useLazyGetOneTestRecordQuery: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetOneTestRecordQuery>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useLazyGetOneTestRecordQuery({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parseTestRecord(result.data) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        },
+        currentData: result.currentData && parseTestRecord(result.currentData) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        },
+      }),
+    });
+  },
+
   useGetListTestRecordsQuery: function<T extends TestRecordExpand>(
     args: Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined }
   ) {
     return testRecordsApiInternal.useGetListTestRecordsQuery(args, {
       ...options,
@@ -448,11 +465,51 @@ export const testRecordsApi = {
     });
   },
 
+  useLazyGetListTestRecordsQuery: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useLazyGetListTestRecordsQuery({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && {
+          ...result.data,
+          items: result.data.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
+          }>,
+        },
+        currentData: result.currentData && {
+          ...result.currentData,
+          items: result.currentData.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
+          }>,
+        },
+      }),
+    });
+  },
+
   useGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
     args: Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined }
   ) {
     return testRecordsApiInternal.useGetFullListTestRecordsQuery(args, {
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        }>,
+        currentData: result.currentData?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        }>,
+      }),
+    });
+  },
+
+  useLazyGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetFullListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined }
+  ) {
+    return testRecordsApiInternal.useLazyGetFullListTestRecordsQuery({
       ...options,
       selectFromResult: (result) => ({
         ...result,
