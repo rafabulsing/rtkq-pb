@@ -39,20 +39,18 @@ export type TestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  thisIsRichText: RichText;
+  thisIsRichText: RichText|null;
   thisIsNonEmptyRichText: RichText;
   thisIsEmail: Email|null;
   thisIsNonEmptyEmail: Email;
-  thisIsUrl: Url;
+  thisIsUrl: Url|null;
   thisIsNonEmptyUrl: Url;
   thisIsNumber: number;
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
-  thisIsSingleRelation: Relation;
-  /** Must be non-empty. */
+  thisIsSingleRelation: Relation|null;
   thisIsNonEmptySingleRelation: Relation;
-  thisIsMultipleRelation: Relation[];
-  /** Must be non-empty. */
+  thisIsMultipleRelation: Relation[]|null;
   thisIsNonEmptyMultipleRelation: Relation[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
@@ -86,10 +84,8 @@ export type SerializedTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
-  /** Must be non-empty. */
   thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
-  /** Must be non-empty. */
   thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
   thisIsBoolean: boolean;
@@ -112,20 +108,18 @@ export type CreateTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  thisIsRichText: RichText;
+  thisIsRichText: RichText|null;
   thisIsNonEmptyRichText: RichText;
   thisIsEmail: Email|null;
   thisIsNonEmptyEmail: Email;
-  thisIsUrl: Url;
+  thisIsUrl: Url|null;
   thisIsNonEmptyUrl: Url;
   thisIsNumber: number;
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
-  thisIsSingleRelation: Relation;
-  /** Must be non-empty. */
+  thisIsSingleRelation: Relation|null;
   thisIsNonEmptySingleRelation: Relation;
-  thisIsMultipleRelation: Relation[];
-  /** Must be non-empty. */
+  thisIsMultipleRelation: Relation[]|null;
   thisIsNonEmptyMultipleRelation: Relation[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
@@ -151,10 +145,8 @@ export type SerializedCreateTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
-  /** Must be non-empty. */
   thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
-  /** Must be non-empty. */
   thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
   thisIsBoolean: boolean;
@@ -171,20 +163,18 @@ export type UpdateTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  thisIsRichText: RichText;
+  thisIsRichText: RichText|null;
   thisIsNonEmptyRichText: RichText;
   thisIsEmail: Email|null;
   thisIsNonEmptyEmail: Email;
-  thisIsUrl: Url;
+  thisIsUrl: Url|null;
   thisIsNonEmptyUrl: Url;
   thisIsNumber: number;
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
-  thisIsSingleRelation: Relation;
-  /** Must be non-empty. */
+  thisIsSingleRelation: Relation|null;
   thisIsNonEmptySingleRelation: Relation;
-  thisIsMultipleRelation: Relation[];
-  /** Must be non-empty. */
+  thisIsMultipleRelation: Relation[]|null;
   thisIsNonEmptyMultipleRelation: Relation[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
@@ -214,10 +204,8 @@ export type SerializedUpdateTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
-  /** Must be non-empty. */
   thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
-  /** Must be non-empty. */
   thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
   thisIsBoolean: boolean;
@@ -296,7 +284,11 @@ export type TestRecordRecordFullListOptions =
 export function parseTestRecord(record: SerializedTestRecord): TestRecord {
   return {
     ...record,
+    thisIsRichText: record.thisIsRichText === "" ? null : record.thisIsRichText,
     thisIsEmail: record.thisIsEmail === "" ? null : record.thisIsEmail,
+    thisIsUrl: record.thisIsUrl === "" ? null : record.thisIsUrl,
+    thisIsSingleRelation: record.thisIsSingleRelation === "" ? null : record.thisIsSingleRelation,
+    thisIsMultipleRelation: record.thisIsMultipleRelation.length === 0 ? null : record.thisIsMultipleRelation,
     thisIsDateTime: parseISO(record.thisIsDateTime),
     thisIsAutoDate: parseISO(record.thisIsAutoDate),
     expand: record.expand && {
@@ -323,7 +315,11 @@ export function parseTestRecord(record: SerializedTestRecord): TestRecord {
 export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
   return {
     ...record,
+    thisIsRichText: record.thisIsRichText ?? "",
     thisIsEmail: record.thisIsEmail ?? "",
+    thisIsUrl: record.thisIsUrl ?? "",
+    thisIsSingleRelation: record.thisIsSingleRelation ?? "",
+    thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
     thisIsDateTime: formatISO(record.thisIsDateTime),
     thisIsAutoDate: formatISO(record.thisIsAutoDate),
     expand: record.expand && {
@@ -350,7 +346,11 @@ export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
 export function serializeCreateTestRecord(record: CreateTestRecord): SerializedCreateTestRecord {
   return {
     ...record,
+    thisIsRichText: record.thisIsRichText ?? "",
     thisIsEmail: record.thisIsEmail ?? "",
+    thisIsUrl: record.thisIsUrl ?? "",
+    thisIsSingleRelation: record.thisIsSingleRelation ?? "",
+    thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
     thisIsDateTime: formatISO(record.thisIsDateTime),
   };
 }
@@ -358,7 +358,11 @@ export function serializeCreateTestRecord(record: CreateTestRecord): SerializedC
 export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedUpdateTestRecord {
   return {
     ...record,
+    thisIsRichText: record.thisIsRichText ?? "",
     thisIsEmail: record.thisIsEmail ?? "",
+    thisIsUrl: record.thisIsUrl ?? "",
+    thisIsSingleRelation: record.thisIsSingleRelation ?? "",
+    thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
     thisIsDateTime: formatISO(record.thisIsDateTime),
     "thisIsMultipleFile+": record.thisIsMultipleFileAppend,
     "+thisIsMultipleFile": record.thisIsMultipleFilePrepend,

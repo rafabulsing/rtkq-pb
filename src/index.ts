@@ -209,23 +209,33 @@ class PlainTextField extends Field {
   }
 }
 
-class RichTextField extends PlainTextField {
-  static readonly type = "richText";
-  getParsedType(): string {
-    return "RichText";
-  }
-  getTsDoc(): string | null {
-    return null;
-  }
-}
+abstract class SpecialTextField extends Field {
+  readonly nonEmpty: boolean;
+  abstract readonly flavorType: string;
 
-class EmailField extends PlainTextField {
-  static readonly type = "email";
+  constructor(field: UnknownField) {
+    super(field);
+
+    if (!("nonEmpty" in field)) {
+      throw this.missingPropertyError(field, "nonEmpty");
+    }
+
+    if (typeof field.nonEmpty !== "boolean") {
+      throw this.invalidPropertyTypeError(field, "nonEmpty", "boolean");
+    }
+
+    this.nonEmpty = field.nonEmpty;
+  }
+
   getParsedType(): string {
     if (this.nonEmpty) {
-      return "Email";
+      return this.flavorType;
     }
-    return "Email|null";
+    return `${this.flavorType}|null`;
+  }
+
+  getSerializedType(): string {
+    return "string";
   }
 
   getParser(): string | null {
@@ -247,15 +257,19 @@ class EmailField extends PlainTextField {
   }
 }
 
-class UrlField extends PlainTextField {
-  static readonly type = "url";
-  getParsedType(): string {
-    return "Url";
-  }
+class RichTextField extends SpecialTextField {
+  static readonly type = "richText";
+  readonly flavorType = "RichText";
+}
 
-  getTsDoc(): string | null {
-    return null;
-  }
+class EmailField extends SpecialTextField {
+  static readonly type = "email";
+  readonly flavorType = "Email";
+}
+
+class UrlField extends SpecialTextField {
+  static readonly type = "url";
+  readonly flavorType = "Url";
 }
 
 class NumberField extends Field {
@@ -340,8 +354,8 @@ class RelationField extends Field {
 
   getParsedType(): string {
     return this.mode === "single"
-      ? "Relation"
-      : "Relation[]"
+      ? (this.nonEmpty ? "Relation" : "Relation|null")
+      : (this.nonEmpty ? "Relation[]" : "Relation[]|null")
     ;
   }
 
@@ -352,11 +366,28 @@ class RelationField extends Field {
     ;
   }
 
-  getTsDoc(): string | null {
+  getParser(): string | null {
     if (this.nonEmpty) {
-      return "/** Must be non-empty. */";
+      return null;
     }
-    return null;
+
+    if (this.mode === "single") {
+      return `${this.name}: record.${this.name} === "" ? null : record.${this.name},`;
+    }
+
+    return `${this.name}: record.${this.name}.length === 0 ? null : record.${this.name},`;
+  }
+
+  getSerializer(): string | null {
+    if (this.nonEmpty) {
+      return null;
+    }
+
+    if (this.mode === "single") {
+      return `${this.name}: record.${this.name} ?? "",`;
+    }
+
+    return `${this.name}: record.${this.name} ?? [],`;
   }
 }
 
