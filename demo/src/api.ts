@@ -1,6 +1,6 @@
 import PocketBase, { RecordService, ListResult } from "pocketbase";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
-import { createApi, TypedUseQueryStateResult } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { parseISO, formatISO } from "date-fns";
 
 export interface TypedPockedBase extends PocketBase {
@@ -158,13 +158,13 @@ export type TestRecordExpand = {
 };
 
 export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
-  thisIsSingleRelation: undefined extends T['thisIsSingleRelation']
+  thisIsSingleRelation: undefined extends T["thisIsSingleRelation"]
     ? never
-    : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T['thisIsSingleRelation']>> }
+    : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsSingleRelation"]>> }
   ;
-  thisIsMultipleRelation: undefined extends T['thisIsMultipleRelation']
+  thisIsMultipleRelation: undefined extends T["thisIsMultipleRelation"]
     ? never
-    : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T['thisIsMultipleRelation']>> })[]
+    : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsMultipleRelation"]>> })[]
   ;
 };
 
@@ -359,7 +359,7 @@ export const testRecordsApiInternal = api.injectEndpoints({
       },
       invalidatesTags: (result, error, args) => !result
         ? []
-        : [{ type: "testRecords", id: `LIST-testRecords` }]
+        : [{ type: "testRecords", id: "LIST-testRecords" }]
       ,
     }),
 
@@ -408,7 +408,7 @@ export const testRecordsApi = {
   ...testRecordsApiInternal,
   useGetOneTestRecordQuery: function<T extends TestRecordExpand>(
     args: Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[1], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useGetOneTestRecordQuery(args, {
       ...options,
@@ -425,7 +425,7 @@ export const testRecordsApi = {
   },
 
   useLazyGetOneTestRecordQuery: function<T extends TestRecordExpand>(
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetOneTestRecordQuery>[0], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetOneTestRecordQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useLazyGetOneTestRecordQuery({
       ...options,
@@ -443,7 +443,7 @@ export const testRecordsApi = {
 
   useGetListTestRecordsQuery: function<T extends TestRecordExpand>(
     args: Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useGetListTestRecordsQuery(args, {
       ...options,
@@ -466,7 +466,7 @@ export const testRecordsApi = {
   },
 
   useLazyGetListTestRecordsQuery: function<T extends TestRecordExpand>(
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useLazyGetListTestRecordsQuery({
       ...options,
@@ -490,7 +490,7 @@ export const testRecordsApi = {
 
   useGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
     args: Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useGetFullListTestRecordsQuery(args, {
       ...options,
@@ -507,7 +507,7 @@ export const testRecordsApi = {
   },
 
   useLazyGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetFullListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetFullListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useLazyGetFullListTestRecordsQuery({
       ...options,
@@ -524,7 +524,7 @@ export const testRecordsApi = {
   },
 
   useCreateTestRecordMutation: function<T extends TestRecordExpand>(
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useCreateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useCreateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useCreateTestRecordMutation({
       ...options,
@@ -536,7 +536,7 @@ export const testRecordsApi = {
   },
 
   useUpdateTestRecordMutation: function<T extends TestRecordExpand>(
-    options?: Omit<Parameters<typeof testRecordsApiInternal.useUpdateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined }
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useUpdateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return testRecordsApiInternal.useUpdateTestRecordMutation({
       ...options,
@@ -546,7 +546,7 @@ export const testRecordsApi = {
       }),
     });
   },
-}
+};
 
 export type Expand = { [property: string]: Expand };
 
