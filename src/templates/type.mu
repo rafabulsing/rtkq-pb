@@ -172,7 +172,7 @@ export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase
     ...record,
     {{#fields}}
     {{#parser}}
-    {{parser}}
+    {{&parser}}
     {{/parser}}
     {{/fields}}
     {{#includeExpand}}
@@ -193,7 +193,7 @@ export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): S
     ...record,
     {{#fields}}
     {{#serializer}}
-    {{serializer}}
+    {{&serializer}}
     {{/serializer}}
     {{/fields}}
     {{#includeExpand}}
@@ -214,7 +214,7 @@ export function serializeCreate{{singularUpperCase}}(record: Create{{singularUpp
     ...record,
     {{#fields}}
     {{#createSerializer}}
-    {{createSerializer}}
+    {{&createSerializer}}
     {{/createSerializer}}
     {{/fields}}
   };
@@ -225,7 +225,7 @@ export function serializeUpdate{{singularUpperCase}}(record: Update{{singularUpp
     ...record,
     {{#fields}}
     {{#updateSerializer}}
-    {{updateSerializer}}
+    {{&updateSerializer}}
     {{/updateSerializer}}
     {{#isFile}}{{#isMultiple}}
     "{{name}}+": record.{{name}}Append,

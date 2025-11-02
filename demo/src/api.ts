@@ -34,8 +34,8 @@ export type TestRecord = {
   /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
   /** EmailField. */
-  thisIsEmail: string;
-  /** EmailField. Must not be empty string. */
+  thisIsEmail: string|null;
+  /** EmailField. */
   thisIsNonEmptyEmail: string;
   /** UrlField. */
   thisIsUrl: string;
@@ -77,8 +77,8 @@ export type SerializedTestRecord = {
   /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
   /** EmailField. */
-  thisIsEmail: string;
-  /** EmailField. Must not be empty string. */
+  thisIsEmail: string|null;
+  /** EmailField. */
   thisIsNonEmptyEmail: string;
   /** UrlField. */
   thisIsUrl: string;
@@ -119,8 +119,8 @@ export type CreateTestRecord = {
   /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
   /** EmailField. */
-  thisIsEmail: string;
-  /** EmailField. Must not be empty string. */
+  thisIsEmail: string|null;
+  /** EmailField. */
   thisIsNonEmptyEmail: string;
   /** UrlField. */
   thisIsUrl: string;
@@ -154,8 +154,8 @@ export type SerializedCreateTestRecord = {
   /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
   /** EmailField. */
-  thisIsEmail: string;
-  /** EmailField. Must not be empty string. */
+  thisIsEmail: string|null;
+  /** EmailField. */
   thisIsNonEmptyEmail: string;
   /** UrlField. */
   thisIsUrl: string;
@@ -190,8 +190,8 @@ export type UpdateTestRecord = {
   /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
   /** EmailField. */
-  thisIsEmail: string;
-  /** EmailField. Must not be empty string. */
+  thisIsEmail: string|null;
+  /** EmailField. */
   thisIsNonEmptyEmail: string;
   /** UrlField. */
   thisIsUrl: string;
@@ -229,8 +229,8 @@ export type SerializedUpdateTestRecord = {
   /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
   /** EmailField. */
-  thisIsEmail: string;
-  /** EmailField. Must not be empty string. */
+  thisIsEmail: string|null;
+  /** EmailField. */
   thisIsNonEmptyEmail: string;
   /** UrlField. */
   thisIsUrl: string;
@@ -322,6 +322,7 @@ export type TestRecordRecordFullListOptions =
 export function parseTestRecord(record: SerializedTestRecord): TestRecord {
   return {
     ...record,
+    thisIsEmail: record.thisIsEmail === "" ? null : record.thisIsEmail,
     thisIsDateTime: parseISO(record.thisIsDateTime),
     thisIsAutoDate: parseISO(record.thisIsAutoDate),
     expand: record.expand && {
@@ -348,6 +349,7 @@ export function parseTestRecord(record: SerializedTestRecord): TestRecord {
 export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
   return {
     ...record,
+    thisIsEmail: record.thisIsEmail ?? "",
     thisIsDateTime: formatISO(record.thisIsDateTime),
     thisIsAutoDate: formatISO(record.thisIsAutoDate),
     expand: record.expand && {
@@ -374,6 +376,7 @@ export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
 export function serializeCreateTestRecord(record: CreateTestRecord): SerializedCreateTestRecord {
   return {
     ...record,
+    thisIsEmail: record.thisIsEmail ?? "",
     thisIsDateTime: formatISO(record.thisIsDateTime),
   };
 }
@@ -381,6 +384,7 @@ export function serializeCreateTestRecord(record: CreateTestRecord): SerializedC
 export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedUpdateTestRecord {
   return {
     ...record,
+    thisIsEmail: record.thisIsEmail ?? "",
     thisIsDateTime: formatISO(record.thisIsDateTime),
     "thisIsMultipleFile+": record.thisIsMultipleFileAppend,
     "+thisIsMultipleFile": record.thisIsMultipleFilePrepend,

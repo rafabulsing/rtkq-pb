@@ -228,15 +228,32 @@ class RichTextField extends PlainTextField {
 class EmailField extends PlainTextField {
   static readonly type = "email";
   getParsedType(): string {
-    return "string";
+    if (this.nonEmpty) {
+      return "string";
+    }
+    return "string|null";
   }
   getSerializedType(): string {
-    return "string";
-  }
-  getTsDoc(): string | null {
     if (this.nonEmpty) {
-      return "/** EmailField. Must not be empty string. */";
+      return "string";
     }
+    return "string|null";
+  }
+  getParser(): string | null {
+    if (this.nonEmpty) {
+      return null;
+    }
+    return `${this.name}: record.${this.name} === "" ? null : record.${this.name},`;
+  }
+
+  getSerializer(): string | null {
+    if (this.nonEmpty) {
+      return null;
+    }
+    return `${this.name}: record.${this.name} ?? "",`;
+  }
+
+  getTsDoc(): string | null {
     return "/** EmailField. */";
   }
 }
