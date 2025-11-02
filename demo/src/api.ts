@@ -27,6 +27,8 @@ export const api = createApi({
 export type TestRecord = {
   id: string;
   thisIsPlainText: string;
+  /** Must not be empty **/
+  thisIsNonEmptyPlainText: string;
   thisIsRichText: string;
   thisIsEmail: string;
   thisIsUrl: string;
@@ -51,6 +53,8 @@ export type TestRecord = {
 export type SerializedTestRecord = {
   id: string;
   thisIsPlainText: string;
+  /** Must not be empty **/
+  thisIsNonEmptyPlainText: string;
   thisIsRichText: string;
   thisIsEmail: string;
   thisIsUrl: string;
@@ -74,6 +78,8 @@ export type SerializedTestRecord = {
 
 export type CreateTestRecord = {
   thisIsPlainText: string;
+  /** Must not be empty **/
+  thisIsNonEmptyPlainText: string;
   thisIsRichText: string;
   thisIsEmail: string;
   thisIsUrl: string;
@@ -92,6 +98,8 @@ export type CreateTestRecord = {
 
 export type SerializedCreateTestRecord = {
   thisIsPlainText: string;
+  /** Must not be empty **/
+  thisIsNonEmptyPlainText: string;
   thisIsRichText: string;
   thisIsEmail: string;
   thisIsUrl: string;
@@ -111,6 +119,8 @@ export type SerializedCreateTestRecord = {
 export type UpdateTestRecord = {
   id: string;
   thisIsPlainText: string;
+  /** Must not be empty **/
+  thisIsNonEmptyPlainText: string;
   thisIsRichText: string;
   thisIsEmail: string;
   thisIsUrl: string;
@@ -133,6 +143,8 @@ export type UpdateTestRecord = {
 export type SerializedUpdateTestRecord = {
   id: string;
   thisIsPlainText: string;
+  /** Must not be empty **/
+  thisIsNonEmptyPlainText: string;
   thisIsRichText: string;
   thisIsEmail: string;
   thisIsUrl: string;
@@ -169,7 +181,7 @@ export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
 };
 
 export type TestRecordCommonOptions = {
-  fields?: Array<"id"|"thisIsPlainText"|"thisIsRichText"|"thisIsEmail"|"thisIsUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsEmail"|"thisIsUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestRecordListOptions = TestRecordCommonOptions & {

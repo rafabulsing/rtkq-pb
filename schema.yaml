@@ -5,6 +5,11 @@ collections:
     properties:
       - name: "thisIsPlainText"
         type: "plainText"
+        nonEmpty: false
+
+      - name: "thisIsNonEmptyPlainText"
+        type: "plainText"
+        nonEmpty: true
       
       - name: "thisIsRichText"
         type: "richText"

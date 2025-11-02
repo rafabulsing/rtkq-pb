@@ -70,8 +70,28 @@ abstract class Field {
   getUpdateSerializer(): string|null {
     return this.getSerializer();
   }
+
+  getTsDoc(): string|null {
+    return null;
+  }
+
   constructor(field: UnknownField) {
     this.name = field.name;
+  }
+
+  errorMsg(field: UnknownField, message: string): string {
+    return `${this.constructor.name} ${field.name}: ${message}`;
+  }
+
+  missingPropertyMsg(field: UnknownField, property: string): string {
+    return this.errorMsg(field, `Property "${property}" is missing`);
+  }
+
+  invalidPropertyTypeMsg(field: UnknownField, property: string, expected: string): string {
+    return this.errorMsg(
+      field,
+      `Property "${property}" is of type ${typeof field[property]}. Must be ${expected}`,
+    );
   }
 }
 
@@ -126,14 +146,31 @@ type UnknownField = {
 
 class PlainTextField extends Field {
   static readonly type = "plainText";
+  readonly nonEmpty: boolean;
   constructor(field: UnknownField) {
     super(field);
+
+    if (!("nonEmpty" in field)) {
+      throw new Error(this.missingPropertyMsg(field, "nonEmpty"));
+    }
+
+    if (typeof field.nonEmpty !== "boolean") {
+      throw new Error(this.invalidPropertyTypeMsg(field, "nonEmpty", "boolean"));
+    }
+
+    this.nonEmpty = field.nonEmpty;
   }
   getParsedType(): string {
     return "string";
   }
   getSerializedType(): string {
     return "string";
+  }
+  getTsDoc(): string | null {
+    if (this.nonEmpty) {
+      return `/** Must not be empty **/`;
+    }
+    return null;
   }
 }
 
@@ -567,6 +604,7 @@ export function schemaToTypes(inputFilePath: string, outputFilePath: string) {
             createSerializer: f.getCreateSerializer(),
             updateParser: f.getUpdateParser(),
             updateSerializer: f.getUpdateSerializer(),
+            tsDoc: f.getTsDoc(),
           })),
           includeExpand: fields.some((f) => f instanceof RelationField),
           expand: fields

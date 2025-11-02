@@ -34,6 +34,9 @@ export const api = createApi({
 export type {{singularUpperCase}} = {
   id: string;
   {{#fields}}
+  {{#tsDoc}}
+  {{&.}}
+  {{/tsDoc}}
   {{&parsed}}
   {{/fields}}
   {{#includeExpand}}
@@ -48,6 +51,9 @@ export type {{singularUpperCase}} = {
 export type Serialized{{singularUpperCase}} = {
   id: string;
   {{#fields}}
+  {{#tsDoc}}
+  {{&.}}
+  {{/tsDoc}}
   {{&serialized}}
   {{/fields}}
   {{#includeExpand}}
@@ -62,6 +68,9 @@ export type Serialized{{singularUpperCase}} = {
 export type Create{{singularUpperCase}} = {
   {{#fields}}
   {{#createParsed}}
+  {{#tsDoc}}
+  {{&.}}
+  {{/tsDoc}}
   {{&createParsed}}
   {{/createParsed}}
   {{/fields}}
@@ -70,6 +79,9 @@ export type Create{{singularUpperCase}} = {
 export type SerializedCreate{{singularUpperCase}} = {
   {{#fields}}
   {{#createSerialized}}
+  {{#tsDoc}}
+  {{&.}}
+  {{/tsDoc}}
   {{&createSerialized}}
   {{/createSerialized}}
   {{/fields}}
@@ -79,6 +91,9 @@ export type Update{{singularUpperCase}} = {
   id: string;
   {{#fields}}
   {{#updateParsed}}
+  {{#tsDoc}}
+  {{&.}}
+  {{/tsDoc}}
   {{&updateParsed}}
   {{/updateParsed}}
   {{/fields}}
@@ -88,6 +103,9 @@ export type SerializedUpdate{{singularUpperCase}} = {
   id: string;
   {{#fields}}
   {{#updateSerialized}}
+  {{#tsDoc}}
+  {{&.}}
+  {{/tsDoc}}
   {{&updateSerialized}}
   {{/updateSerialized}}
   {{/fields}}
