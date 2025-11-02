@@ -69,6 +69,11 @@ collections:
       
       - name: "thisIsDateTime"
         type: "datetime"
+        nonEmpty: false
+      
+      - name: "thisIsNonEmptyDateTime"
+        type: "datetime"
+        nonEmpty: true
       
       - name: "thisIsBoolean"
         type: "boolean"

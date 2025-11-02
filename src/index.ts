@@ -402,13 +402,23 @@ class RelationField extends Field {
 
 class DateTimeField extends Field {
   static readonly type = "datetime";
+  nonEmpty: boolean;
 
   constructor(field: UnknownField) {
     super(field);
+
+    if (!this.hasBooleanProperty<"nonEmpty">(field, "nonEmpty")) {
+      assert(false);
+    }
+    
+    this.nonEmpty = field.nonEmpty;
   }
 
   getParsedType(): string {
-    return "Date";
+    if (this.nonEmpty) {
+      return "Date";
+    }
+    return "Date|null";
   }
 
   getSerializedType(): string {
@@ -416,11 +426,18 @@ class DateTimeField extends Field {
   }
 
   getParser(): string | null {
-    return `${this.name}: parseISO(record.${this.name}),`;
+    if (this.nonEmpty) {
+      return `${this.name}: parseISO(record.${this.name}),`;
+    }
+    
+    return `${this.name}: record.${this.name} === "" ? null : parseISO(record.${this.name}),`;
   }
 
   getSerializer(): string | null {
-    return `${this.name}: formatISO(record.${this.name}),`;
+    if (this.nonEmpty) {
+      return `${this.name}: formatISO(record.${this.name}),`;
+    }
+    return `${this.name}: record.${this.name} ? formatISO(record.${this.name}) : "",`;
   }
 }
 

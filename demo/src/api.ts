@@ -52,7 +52,8 @@ export type TestRecord = {
   thisIsNonEmptySingleRelation: Relation;
   thisIsMultipleRelation: Relation[]|null;
   thisIsNonEmptyMultipleRelation: Relation[];
-  thisIsDateTime: Date;
+  thisIsDateTime: Date|null;
+  thisIsNonEmptyDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
   thisIsSingleSelect: "somebody"|"once"|"told"|"me";
@@ -88,6 +89,7 @@ export type SerializedTestRecord = {
   thisIsMultipleRelation: string[];
   thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
+  thisIsNonEmptyDateTime: string;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
   thisIsSingleSelect: "somebody"|"once"|"told"|"me";
@@ -121,7 +123,8 @@ export type CreateTestRecord = {
   thisIsNonEmptySingleRelation: Relation;
   thisIsMultipleRelation: Relation[]|null;
   thisIsNonEmptyMultipleRelation: Relation[];
-  thisIsDateTime: Date;
+  thisIsDateTime: Date|null;
+  thisIsNonEmptyDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
   thisIsSingleSelect: "somebody"|"once"|"told"|"me";
@@ -149,6 +152,7 @@ export type SerializedCreateTestRecord = {
   thisIsMultipleRelation: string[];
   thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
+  thisIsNonEmptyDateTime: string;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
   thisIsSingleSelect: "somebody"|"once"|"told"|"me";
@@ -176,7 +180,8 @@ export type UpdateTestRecord = {
   thisIsNonEmptySingleRelation: Relation;
   thisIsMultipleRelation: Relation[]|null;
   thisIsNonEmptyMultipleRelation: Relation[];
-  thisIsDateTime: Date;
+  thisIsDateTime: Date|null;
+  thisIsNonEmptyDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
   thisIsSingleSelect: "somebody"|"once"|"told"|"me";
@@ -208,6 +213,7 @@ export type SerializedUpdateTestRecord = {
   thisIsMultipleRelation: string[];
   thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
+  thisIsNonEmptyDateTime: string;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
   thisIsSingleSelect: "somebody"|"once"|"told"|"me";
@@ -247,7 +253,7 @@ export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
 };
 
 export type TestRecordCommonOptions = {
-  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsNonZeroNumber"|"thisIsSingleRelation"|"thisIsNonEmptySingleRelation"|"thisIsMultipleRelation"|"thisIsNonEmptyMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsNonZeroNumber"|"thisIsSingleRelation"|"thisIsNonEmptySingleRelation"|"thisIsMultipleRelation"|"thisIsNonEmptyMultipleRelation"|"thisIsDateTime"|"thisIsNonEmptyDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestRecordListOptions = TestRecordCommonOptions & {
@@ -289,7 +295,8 @@ export function parseTestRecord(record: SerializedTestRecord): TestRecord {
     thisIsUrl: record.thisIsUrl === "" ? null : record.thisIsUrl,
     thisIsSingleRelation: record.thisIsSingleRelation === "" ? null : record.thisIsSingleRelation,
     thisIsMultipleRelation: record.thisIsMultipleRelation.length === 0 ? null : record.thisIsMultipleRelation,
-    thisIsDateTime: parseISO(record.thisIsDateTime),
+    thisIsDateTime: record.thisIsDateTime === "" ? null : parseISO(record.thisIsDateTime),
+    thisIsNonEmptyDateTime: parseISO(record.thisIsNonEmptyDateTime),
     thisIsAutoDate: parseISO(record.thisIsAutoDate),
     expand: record.expand && {
       thisIsSingleRelation: record.expand.thisIsSingleRelation
@@ -320,7 +327,8 @@ export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
     thisIsUrl: record.thisIsUrl ?? "",
     thisIsSingleRelation: record.thisIsSingleRelation ?? "",
     thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
-    thisIsDateTime: formatISO(record.thisIsDateTime),
+    thisIsDateTime: record.thisIsDateTime ? formatISO(record.thisIsDateTime) : "",
+    thisIsNonEmptyDateTime: formatISO(record.thisIsNonEmptyDateTime),
     thisIsAutoDate: formatISO(record.thisIsAutoDate),
     expand: record.expand && {
       thisIsSingleRelation: record.expand.thisIsSingleRelation
@@ -351,7 +359,8 @@ export function serializeCreateTestRecord(record: CreateTestRecord): SerializedC
     thisIsUrl: record.thisIsUrl ?? "",
     thisIsSingleRelation: record.thisIsSingleRelation ?? "",
     thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
-    thisIsDateTime: formatISO(record.thisIsDateTime),
+    thisIsDateTime: record.thisIsDateTime ? formatISO(record.thisIsDateTime) : "",
+    thisIsNonEmptyDateTime: formatISO(record.thisIsNonEmptyDateTime),
   };
 }
 
@@ -363,7 +372,8 @@ export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedU
     thisIsUrl: record.thisIsUrl ?? "",
     thisIsSingleRelation: record.thisIsSingleRelation ?? "",
     thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
-    thisIsDateTime: formatISO(record.thisIsDateTime),
+    thisIsDateTime: record.thisIsDateTime ? formatISO(record.thisIsDateTime) : "",
+    thisIsNonEmptyDateTime: formatISO(record.thisIsNonEmptyDateTime),
     "thisIsMultipleFile+": record.thisIsMultipleFileAppend,
     "+thisIsMultipleFile": record.thisIsMultipleFilePrepend,
     "thisIsMultipleFile-": record.thisIsMultipleFileRemove,
