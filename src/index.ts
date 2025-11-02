@@ -212,16 +212,10 @@ class PlainTextField extends Field {
 class RichTextField extends PlainTextField {
   static readonly type = "richText";
   getParsedType(): string {
-    return "string";
-  }
-  getSerializedType(): string {
-    return "string";
+    return "RichText";
   }
   getTsDoc(): string | null {
-    if (this.nonEmpty) {
-      return "/** RichTextField. Must not be empty string. */";
-    }
-    return "/** RichTextField. */";
+    return null;
   }
 }
 
@@ -229,16 +223,11 @@ class EmailField extends PlainTextField {
   static readonly type = "email";
   getParsedType(): string {
     if (this.nonEmpty) {
-      return "string";
+      return "Email";
     }
-    return "string|null";
+    return "Email|null";
   }
-  getSerializedType(): string {
-    if (this.nonEmpty) {
-      return "string";
-    }
-    return "string|null";
-  }
+
   getParser(): string | null {
     if (this.nonEmpty) {
       return null;
@@ -254,23 +243,18 @@ class EmailField extends PlainTextField {
   }
 
   getTsDoc(): string | null {
-    return "/** EmailField. */";
+    return null;
   }
 }
 
 class UrlField extends PlainTextField {
   static readonly type = "url";
   getParsedType(): string {
-    return "string";
+    return "Url";
   }
-  getSerializedType(): string {
-    return "string";
-  }
+
   getTsDoc(): string | null {
-    if (this.nonEmpty) {
-      return "/** UrlField. Must not be empty string. */";
-    }
-    return "/** UrlField. */";
+    return null;
   }
 }
 
@@ -356,8 +340,8 @@ class RelationField extends Field {
 
   getParsedType(): string {
     return this.mode === "single"
-      ? "string"
-      : "string[]"
+      ? "Relation"
+      : "Relation[]"
     ;
   }
 

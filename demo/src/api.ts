@@ -14,6 +14,16 @@ type TagType = never
 
 type Tag = { type: TagType; id: string };
 
+interface Flavoring<FlavorT> {
+  _type?: FlavorT;
+}
+export type Flavor<T, FlavorT> = T & Flavoring<FlavorT>;
+
+type Email = Flavor<string, "Email">;
+type RichText = Flavor<string, "RichText">;
+type Url = Flavor<string, "Url">;
+type Relation = Flavor<string, "Relation">;
+
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
 
 export const api = createApi({
@@ -29,27 +39,21 @@ export type TestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  /** RichTextField. */
-  thisIsRichText: string;
-  /** RichTextField. Must not be empty string. */
-  thisIsNonEmptyRichText: string;
-  /** EmailField. */
-  thisIsEmail: string|null;
-  /** EmailField. */
-  thisIsNonEmptyEmail: string;
-  /** UrlField. */
-  thisIsUrl: string;
-  /** UrlField. Must not be empty string. */
-  thisIsNonEmptyUrl: string;
+  thisIsRichText: RichText;
+  thisIsNonEmptyRichText: RichText;
+  thisIsEmail: Email|null;
+  thisIsNonEmptyEmail: Email;
+  thisIsUrl: Url;
+  thisIsNonEmptyUrl: Url;
   thisIsNumber: number;
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
-  thisIsSingleRelation: string;
+  thisIsSingleRelation: Relation;
   /** Must be non-empty. */
-  thisIsNonEmptySingleRelation: string;
-  thisIsMultipleRelation: string[];
+  thisIsNonEmptySingleRelation: Relation;
+  thisIsMultipleRelation: Relation[];
   /** Must be non-empty. */
-  thisIsNonEmptyMultipleRelation: string[];
+  thisIsNonEmptyMultipleRelation: Relation[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -72,17 +76,11 @@ export type SerializedTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  /** RichTextField. */
   thisIsRichText: string;
-  /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
-  /** EmailField. */
-  thisIsEmail: string|null;
-  /** EmailField. */
+  thisIsEmail: string;
   thisIsNonEmptyEmail: string;
-  /** UrlField. */
   thisIsUrl: string;
-  /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   /** Must be nonzero. */
@@ -114,27 +112,21 @@ export type CreateTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  /** RichTextField. */
-  thisIsRichText: string;
-  /** RichTextField. Must not be empty string. */
-  thisIsNonEmptyRichText: string;
-  /** EmailField. */
-  thisIsEmail: string|null;
-  /** EmailField. */
-  thisIsNonEmptyEmail: string;
-  /** UrlField. */
-  thisIsUrl: string;
-  /** UrlField. Must not be empty string. */
-  thisIsNonEmptyUrl: string;
+  thisIsRichText: RichText;
+  thisIsNonEmptyRichText: RichText;
+  thisIsEmail: Email|null;
+  thisIsNonEmptyEmail: Email;
+  thisIsUrl: Url;
+  thisIsNonEmptyUrl: Url;
   thisIsNumber: number;
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
-  thisIsSingleRelation: string;
+  thisIsSingleRelation: Relation;
   /** Must be non-empty. */
-  thisIsNonEmptySingleRelation: string;
-  thisIsMultipleRelation: string[];
+  thisIsNonEmptySingleRelation: Relation;
+  thisIsMultipleRelation: Relation[];
   /** Must be non-empty. */
-  thisIsNonEmptyMultipleRelation: string[];
+  thisIsNonEmptyMultipleRelation: Relation[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -149,17 +141,11 @@ export type SerializedCreateTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  /** RichTextField. */
   thisIsRichText: string;
-  /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
-  /** EmailField. */
-  thisIsEmail: string|null;
-  /** EmailField. */
+  thisIsEmail: string;
   thisIsNonEmptyEmail: string;
-  /** UrlField. */
   thisIsUrl: string;
-  /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   /** Must be nonzero. */
@@ -185,27 +171,21 @@ export type UpdateTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  /** RichTextField. */
-  thisIsRichText: string;
-  /** RichTextField. Must not be empty string. */
-  thisIsNonEmptyRichText: string;
-  /** EmailField. */
-  thisIsEmail: string|null;
-  /** EmailField. */
-  thisIsNonEmptyEmail: string;
-  /** UrlField. */
-  thisIsUrl: string;
-  /** UrlField. Must not be empty string. */
-  thisIsNonEmptyUrl: string;
+  thisIsRichText: RichText;
+  thisIsNonEmptyRichText: RichText;
+  thisIsEmail: Email|null;
+  thisIsNonEmptyEmail: Email;
+  thisIsUrl: Url;
+  thisIsNonEmptyUrl: Url;
   thisIsNumber: number;
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
-  thisIsSingleRelation: string;
+  thisIsSingleRelation: Relation;
   /** Must be non-empty. */
-  thisIsNonEmptySingleRelation: string;
-  thisIsMultipleRelation: string[];
+  thisIsNonEmptySingleRelation: Relation;
+  thisIsMultipleRelation: Relation[];
   /** Must be non-empty. */
-  thisIsNonEmptyMultipleRelation: string[];
+  thisIsNonEmptyMultipleRelation: Relation[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -224,17 +204,11 @@ export type SerializedUpdateTestRecord = {
   thisIsPlainText: string;
   /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
-  /** RichTextField. */
   thisIsRichText: string;
-  /** RichTextField. Must not be empty string. */
   thisIsNonEmptyRichText: string;
-  /** EmailField. */
-  thisIsEmail: string|null;
-  /** EmailField. */
+  thisIsEmail: string;
   thisIsNonEmptyEmail: string;
-  /** UrlField. */
   thisIsUrl: string;
-  /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   /** Must be nonzero. */

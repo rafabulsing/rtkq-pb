@@ -18,6 +18,16 @@ type TagType = never
 
 type Tag = { type: TagType; id: string };
 
+interface Flavoring<FlavorT> {
+  _type?: FlavorT;
+}
+export type Flavor<T, FlavorT> = T & Flavoring<FlavorT>;
+
+type Email = Flavor<string, "Email">;
+type RichText = Flavor<string, "RichText">;
+type Url = Flavor<string, "Url">;
+type Relation = Flavor<string, "Relation">;
+
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
 
 export const api = createApi({
