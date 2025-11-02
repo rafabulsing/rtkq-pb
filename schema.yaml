@@ -47,11 +47,25 @@ collections:
         type: "relation"
         to: "testRecords"
         mode: "single"
+        nonEmpty: false
+      
+      - name: "thisIsNonEmptySingleRelation"
+        type: "relation"
+        to: "testRecords"
+        mode: "single"
+        nonEmpty: true
         
       - name: "thisIsMultipleRelation"
         type: "relation"
         to: "testRecords"
         mode: "multiple"
+        nonEmpty: false
+        
+      - name: "thisIsNonEmptyMultipleRelation"
+        type: "relation"
+        to: "testRecords"
+        mode: "multiple"
+        nonEmpty: true
       
       - name: "thisIsDateTime"
         type: "datetime"

@@ -296,6 +296,7 @@ class RelationField extends Field {
     "single",
     "multiple",
   ] as const;
+  nonEmpty: boolean;
 
   constructor(field: UnknownField) {
     super(field);
@@ -323,8 +324,17 @@ class RelationField extends Field {
       throw this.invalidEnumPropertyError(field, "mode", ["single", "multiple"]);
     }
 
+    if (!("nonEmpty" in field)) {
+      throw this.missingPropertyError(field, "nonEmpty");
+    }
+
+    if (typeof field.nonEmpty !== "boolean") {
+      throw this.invalidPropertyTypeError(field, "nonEmpty", "boolean");
+    }
+    
     this.to = field.to;
     this.mode = field.mode as "single"|"multiple";
+    this.nonEmpty = field.nonEmpty;
   }
 
   getParsedType(): string {
@@ -339,6 +349,13 @@ class RelationField extends Field {
       ? "string"
       : "string[]"
     ;
+  }
+
+  getTsDoc(): string | null {
+    if (this.nonEmpty) {
+      return "/** Must be non-empty. */";
+    }
+    return null;
   }
 }
 

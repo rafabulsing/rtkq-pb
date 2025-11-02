@@ -45,7 +45,11 @@ export type TestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
+  /** Must be non-empty. */
+  thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
+  /** Must be non-empty. */
+  thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -57,7 +61,9 @@ export type TestRecord = {
   thisIsGeoPoint: { lat: number, lon: number };
   expand: {
     thisIsSingleRelation?: TestRecord;
+    thisIsNonEmptySingleRelation?: TestRecord;
     thisIsMultipleRelation?: TestRecord[];
+    thisIsNonEmptyMultipleRelation?: TestRecord[];
   };
 };
 
@@ -82,7 +88,11 @@ export type SerializedTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
+  /** Must be non-empty. */
+  thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
+  /** Must be non-empty. */
+  thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -94,7 +104,9 @@ export type SerializedTestRecord = {
   thisIsGeoPoint: { lat: number, lon: number };
   expand: {
     thisIsSingleRelation?: SerializedTestRecord;
+    thisIsNonEmptySingleRelation?: SerializedTestRecord;
     thisIsMultipleRelation?: SerializedTestRecord[];
+    thisIsNonEmptyMultipleRelation?: SerializedTestRecord[];
   };
 };
 
@@ -118,7 +130,11 @@ export type CreateTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
+  /** Must be non-empty. */
+  thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
+  /** Must be non-empty. */
+  thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -149,7 +165,11 @@ export type SerializedCreateTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
+  /** Must be non-empty. */
+  thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
+  /** Must be non-empty. */
+  thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -181,7 +201,11 @@ export type UpdateTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
+  /** Must be non-empty. */
+  thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
+  /** Must be non-empty. */
+  thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: Date;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -216,7 +240,11 @@ export type SerializedUpdateTestRecord = {
   /** Must be nonzero. */
   thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
+  /** Must be non-empty. */
+  thisIsNonEmptySingleRelation: string;
   thisIsMultipleRelation: string[];
+  /** Must be non-empty. */
+  thisIsNonEmptyMultipleRelation: string[];
   thisIsDateTime: string;
   thisIsBoolean: boolean;
   thisIsJson: unknown;
@@ -232,7 +260,9 @@ export type SerializedUpdateTestRecord = {
 
 export type TestRecordExpand = {
   thisIsSingleRelation?: TestRecordExpand;
+  thisIsNonEmptySingleRelation?: TestRecordExpand;
   thisIsMultipleRelation?: TestRecordExpand;
+  thisIsNonEmptyMultipleRelation?: TestRecordExpand;
 };
 
 export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
@@ -240,14 +270,22 @@ export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
     ? never
     : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsSingleRelation"]>> }
   ;
+  thisIsNonEmptySingleRelation: undefined extends T["thisIsNonEmptySingleRelation"]
+    ? never
+    : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsNonEmptySingleRelation"]>> }
+  ;
   thisIsMultipleRelation: undefined extends T["thisIsMultipleRelation"]
     ? never
     : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsMultipleRelation"]>> })[]
   ;
+  thisIsNonEmptyMultipleRelation: undefined extends T["thisIsNonEmptyMultipleRelation"]
+    ? never
+    : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsNonEmptyMultipleRelation"]>> })[]
+  ;
 };
 
 export type TestRecordCommonOptions = {
-  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsNonZeroNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsNonZeroNumber"|"thisIsSingleRelation"|"thisIsNonEmptySingleRelation"|"thisIsMultipleRelation"|"thisIsNonEmptyMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestRecordListOptions = TestRecordCommonOptions & {
@@ -291,8 +329,16 @@ export function parseTestRecord(record: SerializedTestRecord): TestRecord {
         ? parseTestRecord(record.expand.thisIsSingleRelation)
         : undefined
       ,
+      thisIsNonEmptySingleRelation: record.expand.thisIsNonEmptySingleRelation
+        ? parseTestRecord(record.expand.thisIsNonEmptySingleRelation)
+        : undefined
+      ,
       thisIsMultipleRelation: record.expand.thisIsMultipleRelation
         ? record.expand.thisIsMultipleRelation.map(parseTestRecord)
+        : undefined
+      ,
+      thisIsNonEmptyMultipleRelation: record.expand.thisIsNonEmptyMultipleRelation
+        ? record.expand.thisIsNonEmptyMultipleRelation.map(parseTestRecord)
         : undefined
       ,
     },
@@ -309,8 +355,16 @@ export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
         ? serializeTestRecord(record.expand.thisIsSingleRelation)
         : undefined
       ,
+      thisIsNonEmptySingleRelation: record.expand.thisIsNonEmptySingleRelation
+        ? serializeTestRecord(record.expand.thisIsNonEmptySingleRelation)
+        : undefined
+      ,
       thisIsMultipleRelation: record.expand.thisIsMultipleRelation
         ? record.expand.thisIsMultipleRelation.map(serializeTestRecord)
+        : undefined
+      ,
+      thisIsNonEmptyMultipleRelation: record.expand.thisIsNonEmptyMultipleRelation
+        ? record.expand.thisIsNonEmptyMultipleRelation.map(serializeTestRecord)
         : undefined
       ,
     },
@@ -338,8 +392,11 @@ function getTagsForTestRecord(record: SerializedTestRecord): Tag[] {
   return ([
     { type: "testRecords", id: record.id },
     ...(!record.expand.thisIsSingleRelation ? [] : getTagsForTestRecord(record.expand.thisIsSingleRelation)),
+    ...(!record.expand.thisIsNonEmptySingleRelation ? [] : getTagsForTestRecord(record.expand.thisIsNonEmptySingleRelation)),
     record.expand.thisIsMultipleRelation && { type: "testRecords", id: `LIST-testRecord-${record.id}` } as const,
     ...(record.expand.thisIsMultipleRelation ?? []).map((e) => getTagsForTestRecord(e)).flat(),
+    record.expand.thisIsNonEmptyMultipleRelation && { type: "testRecords", id: `LIST-testRecord-${record.id}` } as const,
+    ...(record.expand.thisIsNonEmptyMultipleRelation ?? []).map((e) => getTagsForTestRecord(e)).flat(),
   ] as const).filter((t) => !!t);
 }
 
