@@ -93,6 +93,41 @@ abstract class Field {
       `Property "${property}" is of type ${typeof field[property]}. Must be ${expected}`,
     );
   }
+
+  emptyStringPropertyMsg(field: UnknownField, property: string): string {
+    return this.errorMsg(
+      field,
+      `Property "${property} is empty string. Must be non-empty string`,
+    );
+  }
+
+  invalidEnumPropertyMsg(field: UnknownField, property: string, enumValues: readonly string[]): string {
+    return this.errorMsg(
+      field,
+      `Property "${property}" is "${field[property]}". Must be one of ${JSON.stringify(enumValues)}`,
+    );
+  }
+
+  emptyArrayPropertyMsg(field: UnknownField, property: string, arrayElementType: string): string {
+    return this.errorMsg(
+      field,
+      `Property "${property} is empty array. Must be non-empty array of ${arrayElementType}`,
+    );
+  }
+
+  invalidArrayElementTypeMsg(field: UnknownField, property: string, value: unknown, expectedArrayElementType: string): string {
+    return this.errorMsg(
+      field,
+      `Property "${property}" contains value ${value} of type ${typeof value}. All values must be ${expectedArrayElementType}`,
+    );
+  }
+
+  emptyStringInArrayMsg(field: UnknownField, property: string): string {
+    return this.errorMsg(
+      field,
+      `Property "${property}" contains value empty string. All values must be non-empty strings`,
+    );
+  }
 }
 
 function parseField(field: unknown): Field {
@@ -238,32 +273,36 @@ class NumberField extends Field {
 class RelationField extends Field {
   static readonly type = "relation";
   to: string;
-  mode: "single"|"multiple";
+  mode: ArrayElement<typeof RelationField.modes>;
+  static readonly modes = [
+    "single",
+    "multiple",
+  ] as const;
 
   constructor(field: UnknownField) {
     super(field);
     if (!("to" in field)) {
-      throw new Error(`RelationField ${field.name}: Property "to" is missing`);
+      throw new Error(this.missingPropertyMsg(field, "to"));
     }
 
     if (typeof field.to !== "string") {
-      throw new Error(`RelationField ${field.name}: Property "to" is of type ${typeof field.to}. Must be non-empty string`);
+      throw new Error(this.invalidPropertyTypeMsg(field, "to", "non-empty string"));
     }
 
     if (field.to === "") {
-      throw new Error(`RelationField ${field.name}: Property "to" is an empty string. Must be non-empty string`);
+      throw new Error(this.emptyStringPropertyMsg(field, "to"));
     }
 
     if (!("mode" in field)) {
-      throw new Error(`RelationField ${field.name}: Property "mode" is missing`);
+      throw new Error(this.missingPropertyMsg(field, "mode"));
     }
 
     if (typeof field.mode !== "string") {
-      throw new Error(`RelationField ${field.name}: Property "mode" is of type ${typeof field.mode}. Must be a string, either "single" or "multiple"`);
+      throw new Error(this.invalidPropertyTypeMsg(field, "mode", "non-empty string"));
     }
 
     if (!["single", "multiple"].includes(field.mode)) {
-      throw new Error(`RelationField ${field.name}: Property "mode" is "${field.mode}". Must be either "single" or "multiple"`);
+      throw new Error(this.invalidEnumPropertyMsg(field, "mode", ["single", "multiple"]));
     }
 
     this.to = field.to;
@@ -391,46 +430,50 @@ class JsonField extends Field {
 class SelectField extends Field {
   static readonly type = "select";
   options: string[];
-  mode: "single"|"multiple";
+  mode: ArrayElement<typeof SelectField.modes>;
+  static readonly modes = [
+    "single",
+    "multiple",
+  ] as const;
 
   constructor(field: UnknownField) {
     super(field);
     if (!("options" in field)) {
-      throw new Error(`SelectField ${field.name}: Property "options" is missing`);
+      throw new Error(this.missingPropertyMsg(field, "options"));
     }
 
     if (!Array.isArray(field.options)) {
-      throw new Error(`SelectField ${field.name}: Property "options" is of type ${typeof field.options}. Must be a non-empty array of strings`);
+      throw new Error(this.invalidPropertyTypeMsg(field, "options", "non-empty array of strings"));
     }
 
     if (field.options.length === 0) {
-      throw new Error(`SelectField ${field.name}: Property "options" is empty array. Must be a non-empty array of strings`);
+      throw new Error(this.emptyArrayPropertyMsg(field, "options", "strings"));
     }
 
     const invalidOption = field.options.find(o => typeof o !== "string");
     if (invalidOption) {
-      throw new Error(`SelectField ${field.name}: Property "options" contains non-string value ${invalidOption}. All options must be non-empty strings`);
+      throw new Error(this.invalidArrayElementTypeMsg(field, "options", invalidOption, "non-empty strings"));
     }
 
     const emptyStringOption = field.options.some(o => o === "");
     if (emptyStringOption) {
-      throw new Error(`SelectField ${field.name}: Property "options" contains an empty string. All options must be non-empty strings`);
+      throw new Error(this.emptyStringInArrayMsg(field, "options"));
     }
 
     if (!("mode" in field)) {
-      throw new Error(`SelectField ${field.name}: Property "mode" is missing`);
+      throw new Error(this.missingPropertyMsg(field, "mode"));
     }
 
     if (typeof field.mode !== "string") {
-      throw new Error(`SelectField ${field.name}: Property "mode" is of type ${typeof field.mode}. Must be a string, either "single" or "multiple"`);
+      throw new Error(this.invalidPropertyTypeMsg(field, "mode", `string, one of ${JSON.stringify(["single", "multiple"])}`));
     }
 
-    if (!["single", "multiple"].includes(field.mode)) {
-      throw new Error(`SelectField ${field.name}: Property "mode" is "${field.mode}". Must be either "single" or "multiple"`);
+    if (!SelectField.modes.includes(field.mode as any)) {
+      throw new Error(this.invalidEnumPropertyMsg(field, "mode", SelectField.modes));
     }
 
     this.options = field.options;
-    this.mode = field.mode as "single"|"multiple";
+    this.mode = field.mode as ArrayElement<typeof SelectField.modes>;
   }
 
   getParsedType(): string {
@@ -454,24 +497,28 @@ class SelectField extends Field {
 
 class FileField extends Field {
   static readonly type = "file";
-  mode: "single"|"multiple";
+  mode: ArrayElement<typeof FileField.modes>;
+  static readonly modes = [
+    "single",
+    "multiple",
+  ] as const;
 
   constructor(field: UnknownField) {
     super(field);
 
     if (!("mode" in field)) {
-      throw new Error(`FileField ${field.name}: Property "mode" is missing`);
+      throw new Error(this.missingPropertyMsg(field, "mode"));
     }
 
     if (typeof field.mode !== "string") {
-      throw new Error(`FileField ${field.name}: Property "mode" is of type ${typeof field.mode}. Must be a string, either "single" or "multiple"`);
+      throw new Error(this.invalidPropertyTypeMsg(field, "mode", `string, one of ${JSON.stringify(FileField.modes)}`));
     }
 
-    if (!["single", "multiple"].includes(field.mode)) {
-      throw new Error(`FileField ${field.name}: Property "mode" is "${field.mode}". Must be either "single" or "multiple"`);
+    if (!FileField.modes.includes(field.mode as any)) {
+      throw new Error(this.invalidEnumPropertyMsg(field, "mode", FileField.modes));
     }
 
-    this.mode = field.mode as "single"|"multiple";
+    this.mode = field.mode as ArrayElement<typeof FileField.modes>;
   }
 
   getParsedType(): string {
