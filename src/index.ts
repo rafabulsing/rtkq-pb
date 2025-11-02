@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import yaml from "yaml";
 import mustache from "mustache";
+import assert from "assert";
 
 type Collection = {
   name: string;
@@ -128,6 +129,46 @@ abstract class Field {
       `Property "${property}" contains value empty string. All values must be non-empty strings`,
     ));
   }
+
+  hasProperty<P extends string, T>(field: UnknownField, property: P, type: string): field is UnknownField & { [x in P]: T } {
+    if (!(property in field)) {
+      throw this.missingPropertyError(field, property);
+    }
+ 
+    if (typeof field[property] !== type) {
+      throw this.invalidPropertyTypeError(field, property, type);
+    }
+
+    return true;
+  }
+
+  hasBooleanProperty<P extends string>(field: UnknownField, property: P): field is UnknownField & { [x in P]: boolean } {
+    return this.hasProperty<P, boolean>(field, property, "boolean");
+  }
+
+  hasStringProperty<P extends string>(field: UnknownField, property: P): field is UnknownField & { [x in P]: string } {
+    return this.hasProperty<P, boolean>(field, property, "string");
+  }
+
+  hasNonEmptyStringProperty<P extends string>(field: UnknownField, property: P): field is UnknownField & { [x in P]: string } {
+    if (!this.hasStringProperty<P>(field, property)) {
+      assert(false);
+    }
+    if (field[property] === "") {
+      throw this.emptyStringPropertyMsg(field, property);
+    }
+    return true;
+  }
+
+  hasEnumStringProperty<P extends string, O extends string>(field: UnknownField, property: P, enumValues: readonly O[]): field is UnknownField & { [x in P]: O } {
+    if (!this.hasNonEmptyStringProperty<P>(field, property)) {
+      assert(false);
+    }
+    if (!enumValues.includes(field[property] as any)) {
+      throw this.invalidEnumPropertyError(field, property, enumValues);
+    }
+    return true;
+  }
 }
 
 function parseField(field: unknown): Field {
@@ -185,12 +226,8 @@ class PlainTextField extends Field {
   constructor(field: UnknownField) {
     super(field);
 
-    if (!("nonEmpty" in field)) {
-      throw this.missingPropertyError(field, "nonEmpty");
-    }
-
-    if (typeof field.nonEmpty !== "boolean") {
-      throw this.invalidPropertyTypeError(field, "nonEmpty", "boolean");
+    if (!this.hasProperty<"nonEmpty", boolean>(field, "nonEmpty", "boolean")) {
+      assert(false);
     }
 
     this.nonEmpty = field.nonEmpty;
@@ -216,12 +253,8 @@ abstract class SpecialTextField extends Field {
   constructor(field: UnknownField) {
     super(field);
 
-    if (!("nonEmpty" in field)) {
-      throw this.missingPropertyError(field, "nonEmpty");
-    }
-
-    if (typeof field.nonEmpty !== "boolean") {
-      throw this.invalidPropertyTypeError(field, "nonEmpty", "boolean");
+    if (!this.hasBooleanProperty<"nonEmpty">(field, "nonEmpty")) {
+      assert(false);
     }
 
     this.nonEmpty = field.nonEmpty;
@@ -279,12 +312,8 @@ class NumberField extends Field {
   constructor(field: UnknownField) {
     super(field);
 
-    if (!("nonZero" in field)) {
-      throw this.missingPropertyError(field, "nonZero");
-    }
-
-    if (typeof field.nonZero !== "boolean") {
-      throw this.invalidPropertyTypeError(field, "nonZero", "boolean");
+    if (!this.hasBooleanProperty<"nonZero">(field, "nonZero")) {
+      assert(false);
     }
 
     this.nonZero = field.nonZero;
@@ -315,36 +344,16 @@ class RelationField extends Field {
 
   constructor(field: UnknownField) {
     super(field);
-    if (!("to" in field)) {
-      throw this.missingPropertyError(field, "to");
+    if (!this.hasNonEmptyStringProperty<"to">(field, "to")) {
+      assert(false);
     }
 
-    if (typeof field.to !== "string") {
-      throw this.invalidPropertyTypeError(field, "to", "non-empty string");
+    if (!this.hasEnumStringProperty<"mode", ArrayElement<typeof RelationField.modes>>(field, "mode", RelationField.modes)) {
+      assert(false);
     }
 
-    if (field.to === "") {
-      throw this.emptyStringPropertyMsg(field, "to");
-    }
-
-    if (!("mode" in field)) {
-      throw this.missingPropertyError(field, "mode");
-    }
-
-    if (typeof field.mode !== "string") {
-      throw this.invalidPropertyTypeError(field, "mode", "non-empty string");
-    }
-
-    if (!["single", "multiple"].includes(field.mode)) {
-      throw this.invalidEnumPropertyError(field, "mode", ["single", "multiple"]);
-    }
-
-    if (!("nonEmpty" in field)) {
-      throw this.missingPropertyError(field, "nonEmpty");
-    }
-
-    if (typeof field.nonEmpty !== "boolean") {
-      throw this.invalidPropertyTypeError(field, "nonEmpty", "boolean");
+    if (!this.hasBooleanProperty<"nonEmpty">(field, "nonEmpty")) {
+      assert(false);
     }
     
     this.to = field.to;
