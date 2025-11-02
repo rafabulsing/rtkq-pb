@@ -83,50 +83,50 @@ abstract class Field {
     return `${this.constructor.name} ${field.name}: ${message}`;
   }
 
-  missingPropertyMsg(field: UnknownField, property: string): string {
-    return this.errorMsg(field, `Property "${property}" is missing`);
+  missingPropertyError(field: UnknownField, property: string): Error {
+    return new Error(this.errorMsg(field, `Property "${property}" is missing`));
   }
 
-  invalidPropertyTypeMsg(field: UnknownField, property: string, expected: string): string {
-    return this.errorMsg(
+  invalidPropertyTypeError(field: UnknownField, property: string, expected: string): Error {
+    return new Error(this.errorMsg(
       field,
       `Property "${property}" is of type ${typeof field[property]}. Must be ${expected}`,
-    );
+    ));
   }
 
-  emptyStringPropertyMsg(field: UnknownField, property: string): string {
-    return this.errorMsg(
+  emptyStringPropertyMsg(field: UnknownField, property: string): Error {
+    return new Error(this.errorMsg(
       field,
       `Property "${property} is empty string. Must be non-empty string`,
-    );
+    ));
   }
 
-  invalidEnumPropertyMsg(field: UnknownField, property: string, enumValues: readonly string[]): string {
-    return this.errorMsg(
+  invalidEnumPropertyError(field: UnknownField, property: string, enumValues: readonly string[]): Error {
+    return new Error(this.errorMsg(
       field,
       `Property "${property}" is "${field[property]}". Must be one of ${JSON.stringify(enumValues)}`,
-    );
+    ));
   }
 
-  emptyArrayPropertyMsg(field: UnknownField, property: string, arrayElementType: string): string {
-    return this.errorMsg(
+  emptyArrayPropertyError(field: UnknownField, property: string, arrayElementType: string): Error {
+    return new Error(this.errorMsg(
       field,
       `Property "${property} is empty array. Must be non-empty array of ${arrayElementType}`,
-    );
+    ));
   }
 
-  invalidArrayElementTypeMsg(field: UnknownField, property: string, value: unknown, expectedArrayElementType: string): string {
-    return this.errorMsg(
+  invalidArrayElementTypeError(field: UnknownField, property: string, value: unknown, expectedArrayElementType: string): Error {
+    return new Error(this.errorMsg(
       field,
       `Property "${property}" contains value ${value} of type ${typeof value}. All values must be ${expectedArrayElementType}`,
-    );
+    ));
   }
 
-  emptyStringInArrayMsg(field: UnknownField, property: string): string {
-    return this.errorMsg(
+  emptyStringInArrayError(field: UnknownField, property: string): Error {
+    return new Error(this.errorMsg(
       field,
       `Property "${property}" contains value empty string. All values must be non-empty strings`,
-    );
+    ));
   }
 }
 
@@ -186,11 +186,11 @@ class PlainTextField extends Field {
     super(field);
 
     if (!("nonEmpty" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "nonEmpty"));
+      throw this.missingPropertyError(field, "nonEmpty");
     }
 
     if (typeof field.nonEmpty !== "boolean") {
-      throw new Error(this.invalidPropertyTypeMsg(field, "nonEmpty", "boolean"));
+      throw this.invalidPropertyTypeError(field, "nonEmpty", "boolean");
     }
 
     this.nonEmpty = field.nonEmpty;
@@ -265,11 +265,11 @@ class NumberField extends Field {
     super(field);
 
     if (!("nonZero" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "nonZero"));
+      throw this.missingPropertyError(field, "nonZero");
     }
 
     if (typeof field.nonZero !== "boolean") {
-      throw new Error(this.invalidPropertyTypeMsg(field, "nonZero", "boolean"));
+      throw this.invalidPropertyTypeError(field, "nonZero", "boolean");
     }
 
     this.nonZero = field.nonZero;
@@ -300,27 +300,27 @@ class RelationField extends Field {
   constructor(field: UnknownField) {
     super(field);
     if (!("to" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "to"));
+      throw this.missingPropertyError(field, "to");
     }
 
     if (typeof field.to !== "string") {
-      throw new Error(this.invalidPropertyTypeMsg(field, "to", "non-empty string"));
+      throw this.invalidPropertyTypeError(field, "to", "non-empty string");
     }
 
     if (field.to === "") {
-      throw new Error(this.emptyStringPropertyMsg(field, "to"));
+      throw this.emptyStringPropertyMsg(field, "to");
     }
 
     if (!("mode" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "mode"));
+      throw this.missingPropertyError(field, "mode");
     }
 
     if (typeof field.mode !== "string") {
-      throw new Error(this.invalidPropertyTypeMsg(field, "mode", "non-empty string"));
+      throw this.invalidPropertyTypeError(field, "mode", "non-empty string");
     }
 
     if (!["single", "multiple"].includes(field.mode)) {
-      throw new Error(this.invalidEnumPropertyMsg(field, "mode", ["single", "multiple"]));
+      throw this.invalidEnumPropertyError(field, "mode", ["single", "multiple"]);
     }
 
     this.to = field.to;
@@ -457,37 +457,37 @@ class SelectField extends Field {
   constructor(field: UnknownField) {
     super(field);
     if (!("options" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "options"));
+      throw this.missingPropertyError(field, "options");
     }
 
     if (!Array.isArray(field.options)) {
-      throw new Error(this.invalidPropertyTypeMsg(field, "options", "non-empty array of strings"));
+      throw this.invalidPropertyTypeError(field, "options", "non-empty array of strings");
     }
 
     if (field.options.length === 0) {
-      throw new Error(this.emptyArrayPropertyMsg(field, "options", "strings"));
+      throw this.emptyArrayPropertyError(field, "options", "strings");
     }
 
     const invalidOption = field.options.find(o => typeof o !== "string");
     if (invalidOption) {
-      throw new Error(this.invalidArrayElementTypeMsg(field, "options", invalidOption, "non-empty strings"));
+      throw this.invalidArrayElementTypeError(field, "options", invalidOption, "non-empty strings");
     }
 
     const emptyStringOption = field.options.some(o => o === "");
     if (emptyStringOption) {
-      throw new Error(this.emptyStringInArrayMsg(field, "options"));
+      throw this.emptyStringInArrayError(field, "options");
     }
 
     if (!("mode" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "mode"));
+      throw this.missingPropertyError(field, "mode");
     }
 
     if (typeof field.mode !== "string") {
-      throw new Error(this.invalidPropertyTypeMsg(field, "mode", `string, one of ${JSON.stringify(["single", "multiple"])}`));
+      throw this.invalidPropertyTypeError(field, "mode", `string, one of ${JSON.stringify(["single", "multiple"])}`);
     }
 
     if (!SelectField.modes.includes(field.mode as any)) {
-      throw new Error(this.invalidEnumPropertyMsg(field, "mode", SelectField.modes));
+      throw this.invalidEnumPropertyError(field, "mode", SelectField.modes);
     }
 
     this.options = field.options;
@@ -525,15 +525,15 @@ class FileField extends Field {
     super(field);
 
     if (!("mode" in field)) {
-      throw new Error(this.missingPropertyMsg(field, "mode"));
+      throw this.missingPropertyError(field, "mode");
     }
 
     if (typeof field.mode !== "string") {
-      throw new Error(this.invalidPropertyTypeMsg(field, "mode", `string, one of ${JSON.stringify(FileField.modes)}`));
+      throw this.invalidPropertyTypeError(field, "mode", `string, one of ${JSON.stringify(FileField.modes)}`);
     }
 
     if (!FileField.modes.includes(field.mode as any)) {
-      throw new Error(this.invalidEnumPropertyMsg(field, "mode", FileField.modes));
+      throw this.invalidEnumPropertyError(field, "mode", FileField.modes);
     }
 
     this.mode = field.mode as ArrayElement<typeof FileField.modes>;
