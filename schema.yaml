@@ -13,12 +13,27 @@ collections:
       
       - name: "thisIsRichText"
         type: "richText"
+        nonEmpty: false
+
+      - name: "thisIsNonEmptyRichText"
+        type: "richText"
+        nonEmpty: true
 
       - name: "thisIsEmail"
         type: "email"
+        nonEmpty: false
+        
+      - name: "thisIsNonEmptyEmail"
+        type: "email"
+        nonEmpty: true
 
       - name: "thisIsUrl"
         type: "url"
+        nonEmpty: false
+
+      - name: "thisIsNonEmptyUrl"
+        type: "url"
+        nonEmpty: true
       
       - name: "thisIsNumber"
         type: "number"

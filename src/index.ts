@@ -145,7 +145,7 @@ type UnknownField = {
 }
 
 class PlainTextField extends Field {
-  static readonly type = "plainText";
+  static readonly type = "plainText" as string;
   readonly nonEmpty: boolean;
   constructor(field: UnknownField) {
     super(field);
@@ -168,48 +168,57 @@ class PlainTextField extends Field {
   }
   getTsDoc(): string | null {
     if (this.nonEmpty) {
-      return `/** Must not be empty **/`;
+      return `/** Must not be empty string. **/`;
     }
     return null;
   }
 }
 
-class RichTextField extends Field {
+class RichTextField extends PlainTextField {
   static readonly type = "richText";
-  constructor(field: UnknownField) {
-    super(field);
-  }
   getParsedType(): string {
     return "string";
   }
   getSerializedType(): string {
     return "string";
   }
+  getTsDoc(): string | null {
+    if (this.nonEmpty) {
+      return "/** RichTextField. Must not be empty string. */";
+    }
+    return "/** RichTextField. */";
+  }
 }
 
-class EmailField extends Field {
+class EmailField extends PlainTextField {
   static readonly type = "email";
-  constructor(field: UnknownField) {
-    super(field);
-  }
   getParsedType(): string {
     return "string";
   }
   getSerializedType(): string {
     return "string";
+  }
+  getTsDoc(): string | null {
+    if (this.nonEmpty) {
+      return "/** EmailField. Must not be empty string. */";
+    }
+    return "/** EmailField. */";
   }
 }
 
-class UrlField extends Field {
+class UrlField extends PlainTextField {
   static readonly type = "url";
-  constructor(field: UnknownField) {
-    super(field);
-  }
   getParsedType(): string {
     return "string";
   }
   getSerializedType(): string {
     return "string";
+  }
+  getTsDoc(): string | null {
+    if (this.nonEmpty) {
+      return "/** UrlField. Must not be empty string. */";
+    }
+    return "/** UrlField. */";
   }
 }
 

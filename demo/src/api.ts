@@ -27,11 +27,20 @@ export const api = createApi({
 export type TestRecord = {
   id: string;
   thisIsPlainText: string;
-  /** Must not be empty **/
+  /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
+  /** RichTextField. */
   thisIsRichText: string;
+  /** RichTextField. Must not be empty string. */
+  thisIsNonEmptyRichText: string;
+  /** EmailField. */
   thisIsEmail: string;
+  /** EmailField. Must not be empty string. */
+  thisIsNonEmptyEmail: string;
+  /** UrlField. */
   thisIsUrl: string;
+  /** UrlField. Must not be empty string. */
+  thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
@@ -53,11 +62,20 @@ export type TestRecord = {
 export type SerializedTestRecord = {
   id: string;
   thisIsPlainText: string;
-  /** Must not be empty **/
+  /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
+  /** RichTextField. */
   thisIsRichText: string;
+  /** RichTextField. Must not be empty string. */
+  thisIsNonEmptyRichText: string;
+  /** EmailField. */
   thisIsEmail: string;
+  /** EmailField. Must not be empty string. */
+  thisIsNonEmptyEmail: string;
+  /** UrlField. */
   thisIsUrl: string;
+  /** UrlField. Must not be empty string. */
+  thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
@@ -78,11 +96,20 @@ export type SerializedTestRecord = {
 
 export type CreateTestRecord = {
   thisIsPlainText: string;
-  /** Must not be empty **/
+  /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
+  /** RichTextField. */
   thisIsRichText: string;
+  /** RichTextField. Must not be empty string. */
+  thisIsNonEmptyRichText: string;
+  /** EmailField. */
   thisIsEmail: string;
+  /** EmailField. Must not be empty string. */
+  thisIsNonEmptyEmail: string;
+  /** UrlField. */
   thisIsUrl: string;
+  /** UrlField. Must not be empty string. */
+  thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
@@ -98,11 +125,20 @@ export type CreateTestRecord = {
 
 export type SerializedCreateTestRecord = {
   thisIsPlainText: string;
-  /** Must not be empty **/
+  /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
+  /** RichTextField. */
   thisIsRichText: string;
+  /** RichTextField. Must not be empty string. */
+  thisIsNonEmptyRichText: string;
+  /** EmailField. */
   thisIsEmail: string;
+  /** EmailField. Must not be empty string. */
+  thisIsNonEmptyEmail: string;
+  /** UrlField. */
   thisIsUrl: string;
+  /** UrlField. Must not be empty string. */
+  thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
@@ -119,11 +155,20 @@ export type SerializedCreateTestRecord = {
 export type UpdateTestRecord = {
   id: string;
   thisIsPlainText: string;
-  /** Must not be empty **/
+  /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
+  /** RichTextField. */
   thisIsRichText: string;
+  /** RichTextField. Must not be empty string. */
+  thisIsNonEmptyRichText: string;
+  /** EmailField. */
   thisIsEmail: string;
+  /** EmailField. Must not be empty string. */
+  thisIsNonEmptyEmail: string;
+  /** UrlField. */
   thisIsUrl: string;
+  /** UrlField. Must not be empty string. */
+  thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
@@ -143,11 +188,20 @@ export type UpdateTestRecord = {
 export type SerializedUpdateTestRecord = {
   id: string;
   thisIsPlainText: string;
-  /** Must not be empty **/
+  /** Must not be empty string. **/
   thisIsNonEmptyPlainText: string;
+  /** RichTextField. */
   thisIsRichText: string;
+  /** RichTextField. Must not be empty string. */
+  thisIsNonEmptyRichText: string;
+  /** EmailField. */
   thisIsEmail: string;
+  /** EmailField. Must not be empty string. */
+  thisIsNonEmptyEmail: string;
+  /** UrlField. */
   thisIsUrl: string;
+  /** UrlField. Must not be empty string. */
+  thisIsNonEmptyUrl: string;
   thisIsNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
@@ -181,7 +235,7 @@ export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
 };
 
 export type TestRecordCommonOptions = {
-  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsEmail"|"thisIsUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestRecordListOptions = TestRecordCommonOptions & {
