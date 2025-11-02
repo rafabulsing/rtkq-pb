@@ -526,10 +526,6 @@ const fieldClassesMap = Object.fromEntries(
 
 // TODO: deal with optional files
 
-// TODO: wrapper hook that parses dates
-
-// TODO: wrapper that typechecks extends
-
 // TODO: typecheck error in wrapper hooks
 
 // TODO: handle tag invalidation for back relations
