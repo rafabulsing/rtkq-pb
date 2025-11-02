@@ -37,6 +37,11 @@ collections:
       
       - name: "thisIsNumber"
         type: "number"
+        nonZero: false
+      
+      - name: "thisIsNonZeroNumber"
+        type: "number"
+        nonZero: true
       
       - name: "thisIsSingleRelation"
         type: "relation"

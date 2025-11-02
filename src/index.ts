@@ -259,14 +259,32 @@ class UrlField extends PlainTextField {
 
 class NumberField extends Field {
   static readonly type = "number";
+  nonZero: boolean;
+
   constructor(field: UnknownField) {
     super(field);
+
+    if (!("nonZero" in field)) {
+      throw new Error(this.missingPropertyMsg(field, "nonZero"));
+    }
+
+    if (typeof field.nonZero !== "boolean") {
+      throw new Error(this.invalidPropertyTypeMsg(field, "nonZero", "boolean"));
+    }
+
+    this.nonZero = field.nonZero;
   }
   getParsedType(): string {
     return "number";
   }
   getSerializedType(): string {
     return "number";
+  }
+  getTsDoc(): string|null {
+    if (this.nonZero) {
+      return `/** Must be nonzero. */`;
+    }
+    return null;
   }
 }
 

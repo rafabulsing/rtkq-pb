@@ -42,6 +42,8 @@ export type TestRecord = {
   /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
+  /** Must be nonzero. */
+  thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
   thisIsDateTime: Date;
@@ -77,6 +79,8 @@ export type SerializedTestRecord = {
   /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
+  /** Must be nonzero. */
+  thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
   thisIsDateTime: string;
@@ -111,6 +115,8 @@ export type CreateTestRecord = {
   /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
+  /** Must be nonzero. */
+  thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
   thisIsDateTime: Date;
@@ -140,6 +146,8 @@ export type SerializedCreateTestRecord = {
   /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
+  /** Must be nonzero. */
+  thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
   thisIsDateTime: string;
@@ -170,6 +178,8 @@ export type UpdateTestRecord = {
   /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
+  /** Must be nonzero. */
+  thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
   thisIsDateTime: Date;
@@ -203,6 +213,8 @@ export type SerializedUpdateTestRecord = {
   /** UrlField. Must not be empty string. */
   thisIsNonEmptyUrl: string;
   thisIsNumber: number;
+  /** Must be nonzero. */
+  thisIsNonZeroNumber: number;
   thisIsSingleRelation: string;
   thisIsMultipleRelation: string[];
   thisIsDateTime: string;
@@ -235,7 +247,7 @@ export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
 };
 
 export type TestRecordCommonOptions = {
-  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsNonEmptyPlainText"|"thisIsRichText"|"thisIsNonEmptyRichText"|"thisIsEmail"|"thisIsNonEmptyEmail"|"thisIsUrl"|"thisIsNonEmptyUrl"|"thisIsNumber"|"thisIsNonZeroNumber"|"thisIsSingleRelation"|"thisIsMultipleRelation"|"thisIsDateTime"|"thisIsBoolean"|"thisIsJson"|"thisIsSingleSelect"|"thisIsMultipleSelect"|"thisIsSingleFile"|"thisIsMultipleFile"|"thisIsAutoDate"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestRecordListOptions = TestRecordCommonOptions & {
