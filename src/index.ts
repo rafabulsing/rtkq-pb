@@ -699,12 +699,6 @@ const fieldClassesMap = Object.fromEntries(
   fieldClasses.map((fieldType) => [fieldType.type, fieldType]),
 );
 
-// TODO: deal with optional files
-
-// TODO: typecheck error in wrapper hooks
-
-// TODO: handle tag invalidation for back relations
-
 export function schemaToTypes(collections: DbCollection[]): string {
   const typeTemplate = fs.readFileSync(path.join(__dirname, "templates", "type.mu")).toString();
   
