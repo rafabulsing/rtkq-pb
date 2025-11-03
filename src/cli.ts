@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 import { program } from "commander";
-import { schemaToTypes } from ".";
+import { dbToTypes } from ".";
 
 program
   .option("-i, --input <file>")
   .option('-o, --output <file>')
+  .action(({ input, output }) => {
+    if (!input) {
+      throw new Error("Invalid --input");
+    }
+
+    if (!output) {
+      throw new Error("Invalid --output");
+    }
+
+    dbToTypes(input, output);
+  })
 ;
 
 program.parse();
-
-const options = program.opts() as { input?: string; output?: string };
-
-if (!options.input) {
-  throw new Error("Invalid --input");
-}
-
-if (!options.output) {
-  throw new Error("Invalid --output");
-}
-
-schemaToTypes(options.input, options.output);

@@ -1,15 +1,8 @@
 import fs from "fs";
 import path from "path";
-import yaml from "yaml";
 import mustache from "mustache";
 import assert from "assert";
-
-type Collection = {
-  name: string;
-  singular: string;
-  plural: string;
-  properties: UnknownField[];
-}
+import Database from "better-sqlite3";
 
 abstract class Field {
   readonly name: string;
@@ -150,6 +143,10 @@ abstract class Field {
     return this.hasProperty<P, boolean>(field, property, "string");
   }
 
+  hasNumberProperty<P extends string>(field: UnknownField, property: P): field is UnknownField & { [x in P]: number } {
+    return this.hasProperty<P, number>(field, property, "number");
+  }
+
   hasNonEmptyStringProperty<P extends string>(field: UnknownField, property: P): field is UnknownField & { [x in P]: string } {
     if (!this.hasStringProperty<P>(field, property)) {
       assert(false);
@@ -221,16 +218,16 @@ type UnknownField = {
 }
 
 class PlainTextField extends Field {
-  static readonly type = "plainText" as string;
-  readonly nonEmpty: boolean;
+  static readonly type = "text" as string;
+  readonly required: boolean;
   constructor(field: UnknownField) {
     super(field);
 
-    if (!this.hasProperty<"nonEmpty", boolean>(field, "nonEmpty", "boolean")) {
+    if (!this.hasProperty<"required", boolean>(field, "required", "boolean")) {
       assert(false);
     }
 
-    this.nonEmpty = field.nonEmpty;
+    this.required = field.required;
   }
   getParsedType(): string {
     return "string";
@@ -239,7 +236,7 @@ class PlainTextField extends Field {
     return "string";
   }
   getTsDoc(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return `/** Must not be empty string. **/`;
     }
     return null;
@@ -247,21 +244,21 @@ class PlainTextField extends Field {
 }
 
 abstract class SpecialTextField extends Field {
-  readonly nonEmpty: boolean;
+  readonly required: boolean;
   abstract readonly flavorType: string;
 
   constructor(field: UnknownField) {
     super(field);
 
-    if (!this.hasBooleanProperty<"nonEmpty">(field, "nonEmpty")) {
+    if (!this.hasBooleanProperty<"required">(field, "required")) {
       assert(false);
     }
 
-    this.nonEmpty = field.nonEmpty;
+    this.required = field.required;
   }
 
   getParsedType(): string {
-    if (this.nonEmpty) {
+    if (this.required) {
       return this.flavorType;
     }
     return `${this.flavorType}|null`;
@@ -272,14 +269,14 @@ abstract class SpecialTextField extends Field {
   }
 
   getParser(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return null;
     }
     return `${this.name}: record.${this.name} === "" ? null : record.${this.name},`;
   }
 
   getSerializer(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return null;
     }
     return `${this.name}: record.${this.name} ?? "",`;
@@ -291,7 +288,7 @@ abstract class SpecialTextField extends Field {
 }
 
 class RichTextField extends SpecialTextField {
-  static readonly type = "richText";
+  static readonly type = "editor";
   readonly flavorType = "RichText";
 }
 
@@ -307,16 +304,16 @@ class UrlField extends SpecialTextField {
 
 class NumberField extends Field {
   static readonly type = "number";
-  nonZero: boolean;
+  required: boolean;
 
   constructor(field: UnknownField) {
     super(field);
 
-    if (!this.hasBooleanProperty<"nonZero">(field, "nonZero")) {
+    if (!this.hasBooleanProperty<"required">(field, "required")) {
       assert(false);
     }
 
-    this.nonZero = field.nonZero;
+    this.required = field.required;
   }
   getParsedType(): string {
     return "number";
@@ -325,7 +322,7 @@ class NumberField extends Field {
     return "number";
   }
   getTsDoc(): string|null {
-    if (this.nonZero) {
+    if (this.required) {
       return `/** Must be nonzero. */`;
     }
     return null;
@@ -334,53 +331,55 @@ class NumberField extends Field {
 
 class RelationField extends Field {
   static readonly type = "relation";
-  to: string;
-  mode: ArrayElement<typeof RelationField.modes>;
-  static readonly modes = [
-    "single",
-    "multiple",
-  ] as const;
-  nonEmpty: boolean;
+  collectionId: string;
+  minSelect: number;
+  maxSelect: number;
+  required: boolean;
 
   constructor(field: UnknownField) {
     super(field);
-    if (!this.hasNonEmptyStringProperty<"to">(field, "to")) {
+    if (!this.hasNonEmptyStringProperty<"collectionId">(field, "collectionId")) {
       assert(false);
     }
 
-    if (!this.hasEnumStringProperty<"mode", ArrayElement<typeof RelationField.modes>>(field, "mode", RelationField.modes)) {
+    if (!this.hasNumberProperty<"minSelect">(field, "minSelect")) {
       assert(false);
     }
 
-    if (!this.hasBooleanProperty<"nonEmpty">(field, "nonEmpty")) {
+    if (!this.hasNumberProperty<"maxSelect">(field, "maxSelect")) {
+      assert(false);
+    }
+
+    if (!this.hasBooleanProperty<"required">(field, "required")) {
       assert(false);
     }
     
-    this.to = field.to;
-    this.mode = field.mode as "single"|"multiple";
-    this.nonEmpty = field.nonEmpty;
+    this.collectionId = field.collectionId;
+    this.minSelect = field.minSelect;
+    this.maxSelect = field.maxSelect;
+    this.required = field.required;
   }
 
   getParsedType(): string {
-    return this.mode === "single"
-      ? (this.nonEmpty ? "Relation" : "Relation|null")
-      : (this.nonEmpty ? "Relation[]" : "Relation[]|null")
+    return this.maxSelect === 1
+      ? (this.required ? "Relation" : "Relation|null")
+      : (this.required ? "Relation[]" : "Relation[]|null")
     ;
   }
 
   getSerializedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "string"
       : "string[]"
     ;
   }
 
   getParser(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return null;
     }
 
-    if (this.mode === "single") {
+    if (this.maxSelect === 1) {
       return `${this.name}: record.${this.name} === "" ? null : record.${this.name},`;
     }
 
@@ -388,11 +387,11 @@ class RelationField extends Field {
   }
 
   getSerializer(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return null;
     }
 
-    if (this.mode === "single") {
+    if (this.maxSelect === 1) {
       return `${this.name}: record.${this.name} ?? "",`;
     }
 
@@ -401,21 +400,21 @@ class RelationField extends Field {
 }
 
 class DateTimeField extends Field {
-  static readonly type = "datetime";
-  nonEmpty: boolean;
+  static readonly type = "date";
+  required: boolean;
 
   constructor(field: UnknownField) {
     super(field);
 
-    if (!this.hasBooleanProperty<"nonEmpty">(field, "nonEmpty")) {
+    if (!this.hasBooleanProperty<"required">(field, "required")) {
       assert(false);
     }
     
-    this.nonEmpty = field.nonEmpty;
+    this.required = field.required;
   }
 
   getParsedType(): string {
-    if (this.nonEmpty) {
+    if (this.required) {
       return "Date";
     }
     return "Date|null";
@@ -426,7 +425,7 @@ class DateTimeField extends Field {
   }
 
   getParser(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return `${this.name}: parseISO(record.${this.name}),`;
     }
     
@@ -434,7 +433,7 @@ class DateTimeField extends Field {
   }
 
   getSerializer(): string | null {
-    if (this.nonEmpty) {
+    if (this.required) {
       return `${this.name}: formatISO(record.${this.name}),`;
     }
     return `${this.name}: record.${this.name} ? formatISO(record.${this.name}) : "",`;
@@ -442,7 +441,7 @@ class DateTimeField extends Field {
 }
 
 class AutoDateTimeField extends Field {
-  static readonly type = "autoDatetime";
+  static readonly type = "autodate";
 
   constructor(field: UnknownField) {
     super(field);
@@ -495,7 +494,7 @@ class AutoDateTimeField extends Field {
 }
 
 class BooleanField extends Field {
-  static readonly type = "boolean";
+  static readonly type = "bool";
   constructor(field: UnknownField) {
     super(field);
   }
@@ -522,142 +521,118 @@ class JsonField extends Field {
 
 class SelectField extends Field {
   static readonly type = "select";
-  options: string[];
-  mode: ArrayElement<typeof SelectField.modes>;
-  static readonly modes = [
-    "single",
-    "multiple",
-  ] as const;
+  values: string[];
+  maxSelect: number;
 
   constructor(field: UnknownField) {
     super(field);
-    if (!("options" in field)) {
-      throw this.missingPropertyError(field, "options");
+    if (!("values" in field)) {
+      throw this.missingPropertyError(field, "values");
     }
 
-    if (!Array.isArray(field.options)) {
-      throw this.invalidPropertyTypeError(field, "options", "non-empty array of strings");
+    if (!Array.isArray(field.values)) {
+      throw this.invalidPropertyTypeError(field, "values", "non-empty array of strings");
     }
 
-    if (field.options.length === 0) {
-      throw this.emptyArrayPropertyError(field, "options", "strings");
+    if (field.values.length === 0) {
+      throw this.emptyArrayPropertyError(field, "values", "strings");
     }
 
-    const invalidOption = field.options.find(o => typeof o !== "string");
+    const invalidOption = field.values.find(v => typeof v !== "string");
     if (invalidOption) {
-      throw this.invalidArrayElementTypeError(field, "options", invalidOption, "non-empty strings");
+      throw this.invalidArrayElementTypeError(field, "values", invalidOption, "non-empty strings");
     }
 
-    const emptyStringOption = field.options.some(o => o === "");
+    const emptyStringOption = field.values.some(v => v === "");
     if (emptyStringOption) {
-      throw this.emptyStringInArrayError(field, "options");
+      throw this.emptyStringInArrayError(field, "values");
     }
 
-    if (!("mode" in field)) {
-      throw this.missingPropertyError(field, "mode");
+    if (!this.hasNumberProperty(field, "maxSelect")) {
+      assert(false);
     }
 
-    if (typeof field.mode !== "string") {
-      throw this.invalidPropertyTypeError(field, "mode", `string, one of ${JSON.stringify(["single", "multiple"])}`);
-    }
-
-    if (!SelectField.modes.includes(field.mode as any)) {
-      throw this.invalidEnumPropertyError(field, "mode", SelectField.modes);
-    }
-
-    this.options = field.options;
-    this.mode = field.mode as ArrayElement<typeof SelectField.modes>;
+    this.values = field.values;
+    this.maxSelect = field.maxSelect;
   }
 
   getParsedType(): string {
-    const optionsType = this.options.map((o) => `"${o}"`).join("|");
+    const valuesType = this.values.map((v) => `"${v}"`).join("|");
 
-    return this.mode === "single"
-      ? optionsType
-      : `Array<${optionsType}>`
+    return this.maxSelect === 1
+      ? valuesType
+      : `Array<${valuesType}>`
     ;
   }
 
   getSerializedType(): string {
-    const optionsType = this.options.map((o) => `"${o}"`).join("|");
+    const valuesType = this.values.map((v) => `"${v}"`).join("|");
 
-    return this.mode === "single"
-      ? optionsType
-      : `Array<${optionsType}>`
+    return this.maxSelect === 1
+      ? valuesType
+      : `Array<${valuesType}>`
     ;
   }
 }
 
 class FileField extends Field {
   static readonly type = "file";
-  mode: ArrayElement<typeof FileField.modes>;
-  static readonly modes = [
-    "single",
-    "multiple",
-  ] as const;
+  maxSelect: number;
 
   constructor(field: UnknownField) {
     super(field);
 
-    if (!("mode" in field)) {
-      throw this.missingPropertyError(field, "mode");
+    if (!this.hasNumberProperty(field, "maxSelect")) {
+      assert(false);
     }
 
-    if (typeof field.mode !== "string") {
-      throw this.invalidPropertyTypeError(field, "mode", `string, one of ${JSON.stringify(FileField.modes)}`);
-    }
-
-    if (!FileField.modes.includes(field.mode as any)) {
-      throw this.invalidEnumPropertyError(field, "mode", FileField.modes);
-    }
-
-    this.mode = field.mode as ArrayElement<typeof FileField.modes>;
+    this.maxSelect = field.maxSelect;
   }
 
   getParsedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "string"
       : "string[]"
     ;
   }
 
   getSerializedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "string"
       : "string[]"
     ;
   }
 
   getCreateParsedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "File"
       : "File[]"
     ;
   }
 
   getCreateSerializedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "File"
       : "File[]"
     ;
   }
 
   getUpdateParsedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "File|undefined|\"\""
       : "File[]|undefined|[]"
     ;
   }
 
   getUpdateSerializedType(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? "File|undefined|\"\""
       : "File[]|undefined|[]"
     ;
   }
 
   getUpdateParsed(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? super.getUpdateParsed()!
       : super.getUpdateParsed() + `
   ${this.name}Append?: File[];
@@ -667,7 +642,7 @@ class FileField extends Field {
   }
 
   getUpdateSerialized(): string {
-    return this.mode === "single"
+    return this.maxSelect === 1
       ? super.getUpdateSerialized()!
       : super.getUpdateSerialized() + `
   "${this.name}+"?: File[];
@@ -690,6 +665,19 @@ class GeoPointField extends Field {
   }
 }
 
+class PasswordField extends Field {
+  static readonly type = "password";
+  constructor(field: UnknownField) {
+    super(field);
+  }
+  getParsedType(): string {
+    return "string";
+  }
+  getSerializedType(): string {
+    return "string";
+  }
+}
+
 const fieldClasses = [
   PlainTextField,
   RichTextField,
@@ -704,6 +692,7 @@ const fieldClasses = [
   FileField,
   AutoDateTimeField,
   GeoPointField,
+  PasswordField,
 ];
 
 const fieldClassesMap = Object.fromEntries(
@@ -716,70 +705,66 @@ const fieldClassesMap = Object.fromEntries(
 
 // TODO: handle tag invalidation for back relations
 
-export function schemaToTypes(inputFilePath: string, outputFilePath: string) {
-  const file = fs.readFileSync(inputFilePath, "utf-8");
-  const parsed = yaml.parse(file) as { collections: Collection[] };
+export function schemaToTypes(collections: DbCollection[]): string {
   const typeTemplate = fs.readFileSync(path.join(__dirname, "templates", "type.mu")).toString();
   
-  fs.writeFileSync(
-    outputFilePath,
-    mustache.render(typeTemplate, {
-      collections: parsed.collections.map((c) => {
-        let fields: Field[];
-        try {
-          fields = c.properties.map(parseField);
-        } catch (err) {
-          throw new Error(`Collection ${c.name}: Failed to parse fields`, { cause: err });
-        }
-  
-        return {
-          ...c,
-          singularUpperCase: upperCaseFirstChar(c.singular),
-          pluralUpperCase: upperCaseFirstChar(c.plural),
-          fields: fields.map((f) => ({
-            name: f.name,
-            parsed: f.getParsed(),
-            serialized: f.getSerialized(),
-            createParsed: f.getCreateParsed(),
-            createSerialized: f.getCreateSerialized(),
-            updateParsed: f.getUpdateParsed(),
-            updateSerialized: f.getUpdateSerialized(),
-            isFile: f instanceof FileField,
-            isMultiple: "mode" in f && f.mode === "multiple",
-            isAuto: f instanceof AutoDateTimeField,
-            parser: f.getParser(),
-            serializer: f.getSerializer(),
-            createParser: f.getCreateParser(),
-            createSerializer: f.getCreateSerializer(),
-            updateParser: f.getUpdateParser(),
-            updateSerializer: f.getUpdateSerializer(),
-            tsDoc: f.getTsDoc(),
-          })),
-          includeExpand: fields.some((f) => f instanceof RelationField),
-          expand: fields
-            .filter((f) => f instanceof RelationField)
-            .map((f) => {
-              const resolvedTo = parsed.collections.find((c) => c.name === f.to);
-  
-              if (!resolvedTo) {
-                throw new Error(`Collection ${c.name}: RelationField ${f.name} references non-existant collection "${f.to}"`);
-              }
-  
-              return {
-                name: f.name,
-                resolvedTo: upperCaseFirstChar(resolvedTo.singular),
-                resolvedToCollection: resolvedTo.name,
-                collection: c.singular,
-                isMultiple: f.mode === "multiple",
-              };
-            })
-          ,
-        };
-      }),
-    })
-  );
-}
+  return mustache.render(typeTemplate, {
+    collections: collections.map((c) => {
+      let fields: Field[];
+      try {
+        fields = c.fields.map(parseField);
+      } catch (err) {
+        throw new Error(`Collection ${c.name}: Failed to parse fields`, { cause: err });
+      }
 
+      return {
+        name: c.name,
+        singular: c.name,
+        plural: c.name,
+        singularUpperCase: upperCaseFirstChar(c.name),
+        pluralUpperCase: upperCaseFirstChar(c.name),
+        fields: fields.map((f) => ({
+          name: f.name,
+          parsed: f.getParsed(),
+          serialized: f.getSerialized(),
+          createParsed: f.getCreateParsed(),
+          createSerialized: f.getCreateSerialized(),
+          updateParsed: f.getUpdateParsed(),
+          updateSerialized: f.getUpdateSerialized(),
+          isFile: f instanceof FileField,
+          isMultiple: "mode" in f && f.mode === "multiple",
+          isAuto: f instanceof AutoDateTimeField,
+          parser: f.getParser(),
+          serializer: f.getSerializer(),
+          createParser: f.getCreateParser(),
+          createSerializer: f.getCreateSerializer(),
+          updateParser: f.getUpdateParser(),
+          updateSerializer: f.getUpdateSerializer(),
+          tsDoc: f.getTsDoc(),
+        })),
+        includeExpand: fields.some((f) => f instanceof RelationField),
+        expand: fields
+          .filter((f) => f instanceof RelationField)
+          .map((f) => {
+            const resolvedTo = collections.find((c) => c.id === f.collectionId);
+
+            if (!resolvedTo) {
+              throw new Error(`Collection ${c.name}: RelationField ${f.name} references non-existant collection "${f.collectionId}"`);
+            }
+
+            return {
+              name: f.name,
+              resolvedTo: upperCaseFirstChar(resolvedTo.name),
+              resolvedToCollection: resolvedTo.name,
+              collection: c.name,
+              isMultiple: f.maxSelect > 1,
+            };
+          })
+        ,
+      };
+    }),
+  });
+}
 
 function upperCaseFirstChar(str: string): string {
   if (str.length === 0) {
@@ -787,4 +772,190 @@ function upperCaseFirstChar(str: string): string {
   }
 
   return str[0]!.toUpperCase() + str.slice(1);
+}
+
+export function dbToTypes(input: string, output: string) {
+  const db = new Database(input, {
+    readonly: true,
+    fileMustExist: true,
+  });
+
+  const collections = (db
+    .prepare(`SELECT * FROM _collections WHERE system = False`)
+    .all() as RawDbCollection[])
+    .map((c) => ({
+      ...c,
+      fields: (JSON.parse(c.fields) as UnknownDbField[]).filter((f) => f.name !== "id"),
+    }))
+  ;
+
+  const types = schemaToTypes(collections);
+
+  fs.writeFileSync(output, types);
+}
+
+type RawDbCollection = {
+  id: string;
+  system: boolean;
+  type: "base"|"auth";
+  name: string;
+  fields: string;
+}
+
+type DbCollection = Omit<RawDbCollection, "fields"> & { fields: UnknownDbField[] };
+
+type UnknownDbField = never
+  | PlainTextDbField
+  | RichTextDbField
+  | NumberDbField
+  | BooleanDbField
+  | EmailDbField
+  | UrlDbField
+  | DateTimeDbField
+  | AutoDateDbField
+  | SelectDbField
+  | FileDbField
+  | RelationDbField
+  | JsonDbField
+  | GeoPointDbField
+  | PasswordDbField
+;
+
+type DbField = {
+  hidden: boolean;
+  id: string;
+  name: string;
+  presentable: boolean;
+  system: boolean;
+  type: string;
+}
+
+type PlainTextDbField = DbField & {
+  type: "text";
+  autogeneratePattern: string;
+  max: number;
+  min: number;
+  pattern: string;
+  primaryKey: boolean;
+  required: boolean;
+}
+
+type RichTextDbField = DbField & {
+  type: "editor";
+  autogeneratePattern: string;
+  maxSize: number;
+  required: boolean;
+}
+
+type NumberDbField = DbField & {
+  type: "number";
+  max: number|null;
+  min: number|null;
+  onlyInt: boolean;
+  required: boolean;
+}
+
+type BooleanDbField = DbField & {
+  type: "bool";
+  required: boolean;
+}
+
+type EmailDbField = DbField & {
+  type: "email";
+  required: boolean;  
+} & (
+  {
+    exceptDomains: string[];
+    onlyDomains: null;
+  } | {
+    exceptDomains: null;
+    onlyDomains: string[];
+  } | {
+    exceptDomains: null;
+    onlyDomains: null;
+  }
+);
+
+type UrlDbField = DbField & {
+  type: "url";
+  required: boolean;  
+} & (
+  {
+    exceptDomains: string[];
+    onlyDomains: null;
+  } | {
+    exceptDomains: null;
+    onlyDomains: string[];
+  } | {
+    exceptDomains: null;
+    onlyDomains: null;
+  }
+);
+
+type DateTimeDbField = DbField & {
+  type: "date";
+  max: string;
+  min: string;
+  required: boolean;
+}
+
+type AutoDateDbField = DbField & {
+  type: "autodate";
+} & (
+  {
+    onCreate: true;
+    onUpdte: true;
+  } | {
+    onCreate: true;
+    onUpdate: false;
+  } | {
+    onCreate: false;
+    onUpdate: true;
+  }
+)
+
+type SelectDbField = DbField & {
+  type: "select";
+  maxSelect: number;
+  values: string[];
+  required: boolean;
+}
+
+type FileDbField = DbField & {
+  type: "file";
+  maxSelect: number;
+  maxSize: number;
+  mimeTypes: string[];
+  protected: boolean;
+  thumbs: string[];
+  required: boolean;
+}
+
+type RelationDbField = DbField & {
+  type: "relation";
+  cascadeDelete: boolean;
+  collectionId: string;
+  maxSelect: number;
+  minSelect: number;
+  required: boolean;
+}
+
+type JsonDbField = DbField & {
+  type: "json";
+  maxSize: number;
+  required: boolean;
+}
+
+type GeoPointDbField = DbField & {
+  type: "geoPoint";
+  required: boolean;
+}
+
+type PasswordDbField = DbField & {
+  type: "password";
+  cost: number;
+  max: number;
+  min: number;
+  pattern: string;
+  required: boolean;
 }

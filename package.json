@@ -7,7 +7,7 @@
     "build": "run-script-os",
     "build:windows": "powershell scripts\\build.ps1",
     "build:unix": "./scripts/build.sh",
-    "watch": "npx nodemon --exec \"npm run build && node dist/cli.js --input schema.yaml --output demo/src/api.ts\"",
+    "watch": "npx nodemon --exec \"npm run build && node dist/cli.js --input demo/pocketbase/pb_data/data.db --output demo/src/api.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +15,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "better-sqlite3": "^12.4.1",
     "commander": "^14.0.1",
     "mustache": "^4.2.0",
     "typescript": "^5.9.3",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@commander-js/extra-typings": "^14.0.0",
     "@reduxjs/toolkit": "^2.9.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/mustache": "^4.2.6",
     "@types/node": "^24.7.2",
     "date-fns": "^4.1.0",
