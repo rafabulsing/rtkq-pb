@@ -39,77 +39,83 @@ export const api = createApi({
 
 export type Users = {
   id: string;
-  password: string;
-  /** Must not be empty string. **/
-  tokenKey: string;
-  email: Email;
-  emailVisibility: boolean;
-  verified: boolean;
   name: string;
   avatar: string;
   created: Date;
   updated: Date;
+  email: Email,
+  emailVisibility: boolean,
+  verified: boolean,
 };
 
 export type SerializedUsers = {
   id: string;
-  password: string;
-  /** Must not be empty string. **/
-  tokenKey: string;
-  email: string;
-  emailVisibility: boolean;
-  verified: boolean;
   name: string;
   avatar: string;
   created: string;
   updated: string;
+  email: string,
+  emailVisibility: boolean,
+  verified: boolean,
 };
 
 export type CreateUsers = {
-  password: string;
-  /** Must not be empty string. **/
-  tokenKey: string;
-  email: Email;
-  emailVisibility: boolean;
-  verified: boolean;
   name: string;
   avatar: File;
+  email: Email,
+  emailVisibility?: boolean,
+  verified?: boolean,
+  password: string,
+  passwordConfirm: string,
 };
 
 export type SerializedCreateUsers = {
-  password: string;
-  /** Must not be empty string. **/
-  tokenKey: string;
-  email: string;
-  emailVisibility: boolean;
-  verified: boolean;
   name: string;
   avatar: File|undefined|"";
+  email: string,
+  emailVisibility?: boolean,
+  verified?: boolean,
+  password: string,
+  passwordConfirm: string,
 };
 
 export type UpdateUsers = {
   id: string;
-  password: string;
-  /** Must not be empty string. **/
-  tokenKey: string;
-  email: Email;
-  emailVisibility: boolean;
-  verified: boolean;
   name: string;
   avatar: File;
-};
+  email?: Email,
+  emailVisibility?: boolean,
+  verified?: boolean,
+} & (
+  {
+    oldPassword: string,
+    password: string,
+    passwordConfirm: string,
+  } | {
+    oldPassword: undefined,
+    password: undefined,
+    passwordConfirm: undefined,
+  }
+);
 
 export type SerializedUpdateUsers = {
   id: string;
-  password: string;
-  /** Must not be empty string. **/
-  tokenKey: string;
-  email: string;
-  emailVisibility: boolean;
-  verified: boolean;
   name: string;
   avatar: File|undefined|"";
-};
+  email?: string,
+  emailVisibility?: boolean,
+  verified?: boolean,
+} & (
+  {
+    oldPassword: string,
+    password: string,
+    passwordConfirm: string,
+  } | {
+    oldPassword: undefined,
+    password: undefined,
+    passwordConfirm: undefined,
+  }
+);
 
 export type UsersExpand = {
   [key: string]: never;  
@@ -120,7 +126,7 @@ export type ResolvedUsersExpand<T extends UsersExpand> = {
 };
 
 export type UsersCommonOptions = {
-  fields?: Array<"id"|"password"|"tokenKey"|"email"|"emailVisibility"|"verified"|"name"|"avatar"|"created"|"updated"|"created"|"updated">;
+  fields?: Array<"id"|"name"|"avatar"|"created"|"updated"|"created"|"updated">;
 };
 
 export type UsersListOptions = UsersCommonOptions & {

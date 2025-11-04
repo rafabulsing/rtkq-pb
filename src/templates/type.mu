@@ -49,6 +49,11 @@ export type {{singularUpperCase}} = {
   {{/tsDoc}}
   {{&parsed}}
   {{/fields}}
+  {{#isAuthCollection}}
+  email: Email,
+  emailVisibility: boolean,
+  verified: boolean,
+  {{/isAuthCollection}}
   {{#includeExpand}}
   expand: {
     {{#expand}}
@@ -66,6 +71,11 @@ export type Serialized{{singularUpperCase}} = {
   {{/tsDoc}}
   {{&serialized}}
   {{/fields}}
+  {{#isAuthCollection}}
+  email: string,
+  emailVisibility: boolean,
+  verified: boolean,
+  {{/isAuthCollection}}
   {{#includeExpand}}
   expand: {
     {{#expand}}
@@ -84,6 +94,13 @@ export type Create{{singularUpperCase}} = {
   {{&createParsed}}
   {{/createParsed}}
   {{/fields}}
+  {{#isAuthCollection}}
+  email: Email,
+  emailVisibility?: boolean,
+  verified?: boolean,
+  password: string,
+  passwordConfirm: string,
+  {{/isAuthCollection}}
 };
 
 export type SerializedCreate{{singularUpperCase}} = {
@@ -95,6 +112,13 @@ export type SerializedCreate{{singularUpperCase}} = {
   {{&createSerialized}}
   {{/createSerialized}}
   {{/fields}}
+  {{#isAuthCollection}}
+  email: string,
+  emailVisibility?: boolean,
+  verified?: boolean,
+  password: string,
+  passwordConfirm: string,
+  {{/isAuthCollection}}
 };
 
 export type Update{{singularUpperCase}} = {
@@ -107,7 +131,25 @@ export type Update{{singularUpperCase}} = {
   {{&updateParsed}}
   {{/updateParsed}}
   {{/fields}}
+  {{^isAuthCollection}}
 };
+  {{/isAuthCollection}}
+  {{#isAuthCollection}}
+  email?: Email,
+  emailVisibility?: boolean,
+  verified?: boolean,
+} & (
+  {
+    oldPassword: string,
+    password: string,
+    passwordConfirm: string,
+  } | {
+    oldPassword: undefined,
+    password: undefined,
+    passwordConfirm: undefined,
+  }
+);
+{{/isAuthCollection}}
 
 export type SerializedUpdate{{singularUpperCase}} = {
   id: string;
@@ -119,7 +161,25 @@ export type SerializedUpdate{{singularUpperCase}} = {
   {{&updateSerialized}}
   {{/updateSerialized}}
   {{/fields}}
+  {{^isAuthCollection}}
 };
+  {{/isAuthCollection}}
+  {{#isAuthCollection}}
+  email?: string,
+  emailVisibility?: boolean,
+  verified?: boolean,
+} & (
+  {
+    oldPassword: string,
+    password: string,
+    passwordConfirm: string,
+  } | {
+    oldPassword: undefined,
+    password: undefined,
+    passwordConfirm: undefined,
+  }
+);
+{{/isAuthCollection}}
 
 export type {{singularUpperCase}}Expand = {
   {{#expand}}

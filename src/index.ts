@@ -665,19 +665,6 @@ class GeoPointField extends Field {
   }
 }
 
-class PasswordField extends Field {
-  static readonly type = "password";
-  constructor(field: UnknownField) {
-    super(field);
-  }
-  getParsedType(): string {
-    return "string";
-  }
-  getSerializedType(): string {
-    return "string";
-  }
-}
-
 const fieldClasses = [
   PlainTextField,
   RichTextField,
@@ -692,7 +679,6 @@ const fieldClasses = [
   FileField,
   AutoDateTimeField,
   GeoPointField,
-  PasswordField,
 ];
 
 const fieldClassesMap = Object.fromEntries(
@@ -717,6 +703,7 @@ export function schemaToTypes(collections: DbCollection[]): string {
         plural: c.name,
         singularUpperCase: upperCaseFirstChar(c.name),
         pluralUpperCase: upperCaseFirstChar(c.name),
+        isAuthCollection: c.type === "auth",
         fields: fields.map((f) => ({
           name: f.name,
           parsed: f.getParsed(),
@@ -779,7 +766,9 @@ export function dbToTypes(input: string, output: string) {
     .all() as RawDbCollection[])
     .map((c) => ({
       ...c,
-      fields: (JSON.parse(c.fields) as UnknownDbField[]).filter((f) => f.name !== "id"),
+      fields: (JSON.parse(c.fields) as UnknownDbField[])
+        .filter((f) => !f.system)
+      ,
     }))
   ;
 
