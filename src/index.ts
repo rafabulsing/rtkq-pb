@@ -699,10 +699,10 @@ export function schemaToTypes(collections: DbCollection[]): string {
 
       return {
         name: c.name,
-        singular: c.name,
-        plural: c.name,
-        singularUpperCase: upperCaseFirstChar(c.name),
-        pluralUpperCase: upperCaseFirstChar(c.name),
+        singular: c.config.singular,
+        plural: c.config.plural,
+        singularUpperCase: upperCaseFirstChar(c.config.singular),
+        pluralUpperCase: upperCaseFirstChar(c.config.plural),
         isAuthCollection: c.type === "auth",
         fields: fields.map((f) => ({
           name: f.name,
@@ -735,7 +735,7 @@ export function schemaToTypes(collections: DbCollection[]): string {
 
             return {
               name: f.name,
-              resolvedTo: upperCaseFirstChar(resolvedTo.name),
+              resolvedTo: upperCaseFirstChar(resolvedTo.config.singular),
               resolvedToCollection: resolvedTo.name,
               collection: c.name,
               isMultiple: f.maxSelect > 1,
@@ -755,11 +755,13 @@ function upperCaseFirstChar(str: string): string {
   return str[0]!.toUpperCase() + str.slice(1);
 }
 
-export function dbToTypes(input: string, output: string) {
-  const db = new Database(input, {
+export function dbToTypes(dbPath: string, outputPath: string, configPath: string) {
+  const db = new Database(dbPath, {
     readonly: true,
     fileMustExist: true,
   });
+
+  const config: Record<string, CollectionConfig> = JSON.parse(fs.readFileSync(configPath).toString());
 
   const collections = (db
     .prepare(`SELECT * FROM _collections WHERE system = False`)
@@ -769,12 +771,19 @@ export function dbToTypes(input: string, output: string) {
       fields: (JSON.parse(c.fields) as UnknownDbField[])
         .filter((f) => !f.system)
       ,
+      config: config[c.name],
     }))
   ;
 
-  const types = schemaToTypes(collections);
+  const missingConfig = collections.find((c) => !c.config)
+  if (missingConfig) {
+    console.log(`Did not find config for collection ${missingConfig.name}`);
+    return;
+  }
 
-  fs.writeFileSync(output, types);
+  const types = schemaToTypes(collections as DbCollection[]);
+
+  fs.writeFileSync(outputPath, types);
 }
 
 type RawDbCollection = {
@@ -785,7 +794,15 @@ type RawDbCollection = {
   fields: string;
 }
 
-type DbCollection = Omit<RawDbCollection, "fields"> & { fields: UnknownDbField[] };
+type DbCollection = Omit<RawDbCollection, "fields"> & {
+  fields: UnknownDbField[],
+  config: CollectionConfig,
+};
+
+type CollectionConfig = {
+  singular: string;
+  plural: string;
+}
 
 type UnknownDbField = never
   | PlainTextDbField

@@ -5,7 +5,8 @@ import { dbToTypes } from ".";
 program
   .option("-i, --input <file>")
   .option('-o, --output <file>')
-  .action(({ input, output }) => {
+  .option('-c, --config <file>')
+  .action(({ input, output, config }) => {
     if (!input) {
       throw new Error("Invalid --input");
     }
@@ -14,7 +15,11 @@ program
       throw new Error("Invalid --output");
     }
 
-    dbToTypes(input, output);
+    if (!config) {
+      throw new Error("Invalid --config");
+    }
+
+    dbToTypes(input, output, config);
   })
 ;
 

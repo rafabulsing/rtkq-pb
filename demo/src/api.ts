@@ -5,8 +5,8 @@ import { parseISO, formatISO } from "date-fns";
 
 export interface TypedPockedBase extends PocketBase {
   collection(idOrName: string): RecordService<never>;
-  collection(idOrName: "users"): RecordService<SerializedUsers>;
-  collection(idOrName: "testCollection"): RecordService<SerializedTestCollection>;
+  collection(idOrName: "users"): RecordService<SerializedUser>;
+  collection(idOrName: "testCollection"): RecordService<SerializedTestRecord>;
 }
 
 type TagType = never
@@ -37,7 +37,7 @@ export const api = createApi({
   ],
 });
 
-export type Users = {
+export type User = {
   id: string;
   name: string;
   avatar: string;
@@ -48,7 +48,7 @@ export type Users = {
   verified: boolean,
 };
 
-export type SerializedUsers = {
+export type SerializedUser = {
   id: string;
   name: string;
   avatar: string;
@@ -59,7 +59,7 @@ export type SerializedUsers = {
   verified: boolean,
 };
 
-export type CreateUsers = {
+export type CreateUser = {
   name: string;
   avatar: File;
   email: Email,
@@ -69,7 +69,7 @@ export type CreateUsers = {
   passwordConfirm: string,
 };
 
-export type SerializedCreateUsers = {
+export type SerializedCreateUser = {
   name: string;
   avatar: File|undefined|"";
   email: string,
@@ -79,7 +79,7 @@ export type SerializedCreateUsers = {
   passwordConfirm: string,
 };
 
-export type UpdateUsers = {
+export type UpdateUser = {
   id: string;
   name?: string;
   avatar?: File;
@@ -98,7 +98,7 @@ export type UpdateUsers = {
   }
 );
 
-export type SerializedUpdateUsers = {
+export type SerializedUpdateUser = {
   id: string;
   name?: string;
   avatar?: File|undefined|"";
@@ -117,19 +117,19 @@ export type SerializedUpdateUsers = {
   }
 );
 
-export type UsersExpand = {
+export type UserExpand = {
   [key: string]: never;  
 };
 
-export type ResolvedUsersExpand<T extends UsersExpand> = {
+export type ResolvedUserExpand<T extends UserExpand> = {
   [key: string]: never;  
 };
 
-export type UsersCommonOptions = {
+export type UserCommonOptions = {
   fields?: Array<"id"|"name"|"avatar"|"created"|"updated"|"created"|"updated">;
 };
 
-export type UsersListOptions = UsersCommonOptions & {
+export type UserListOptions = UserCommonOptions & {
   page?: number;
   perPage?: number;
   sort?: string;
@@ -137,30 +137,30 @@ export type UsersListOptions = UsersCommonOptions & {
   skipTotal?: boolean;
 };
 
-export type UsersFullListOptions = UsersListOptions & {
-  expand?: UsersExpand;
+export type UserFullListOptions = UserListOptions & {
+  expand?: UserExpand;
   batch?: number;
 };
 
-export type UsersRecordOptions = UsersCommonOptions & {
-  expand?: UsersExpand;
+export type UserRecordOptions = UserCommonOptions & {
+  expand?: UserExpand;
 };
 
-export type UsersRecordListOptions = unknown
-  & UsersRecordOptions
-  & UsersListOptions
+export type UserRecordListOptions = unknown
+  & UserRecordOptions
+  & UserListOptions
   & {
     page?: number;
     perPage?: number;
   }
 ;
 
-export type UsersRecordFullListOptions =
-  & UsersFullListOptions
-  & UsersRecordOptions
+export type UserRecordFullListOptions =
+  & UserFullListOptions
+  & UserRecordOptions
 ;
 
-export function parseUsers(record: SerializedUsers): Users {
+export function parseUser(record: SerializedUser): User {
   return {
     ...record,
     created: parseISO(record.created),
@@ -168,7 +168,7 @@ export function parseUsers(record: SerializedUsers): Users {
   };
 }
 
-export function serializeUsers(record: Users): SerializedUsers {
+export function serializeUser(record: User): SerializedUser {
   return {
     ...record,
     created: formatISO(record.created),
@@ -176,19 +176,19 @@ export function serializeUsers(record: Users): SerializedUsers {
   };
 }
 
-export function serializeCreateUsers(record: CreateUsers): SerializedCreateUsers {
+export function serializeCreateUser(record: CreateUser): SerializedCreateUser {
   return {
     ...record,
   };
 }
 
-export function serializeUpdateUsers(record: UpdateUsers): SerializedUpdateUsers {
+export function serializeUpdateUser(record: UpdateUser): SerializedUpdateUser {
   return {
     ...record,
   };
 }
 
-function getTagsForUsers(record: SerializedUsers): Tag[] {
+function getTagsForUser(record: SerializedUser): Tag[] {
   return ([
     { type: "users", id: record.id },
   ] as const).filter((t) => !!t);
@@ -196,7 +196,7 @@ function getTagsForUsers(record: SerializedUsers): Tag[] {
 
 export const usersApiInternal = api.injectEndpoints({
   endpoints: (build) => ({
-    getOneUsers: build.query<SerializedUsers, string|({ id: string } & UsersRecordOptions)>({
+    getOneUser: build.query<SerializedUser, string|({ id: string } & UserRecordOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -215,11 +215,11 @@ export const usersApiInternal = api.injectEndpoints({
       },
       providesTags: (result, error, args) => !result
         ? []
-        : getTagsForUsers(result)
+        : getTagsForUser(result)
       ,
     }),
 
-    getListUsers: build.query<ListResult<SerializedUsers>, UsersRecordListOptions|void>({
+    getListUsers: build.query<ListResult<SerializedUser>, UserRecordListOptions|void>({
       queryFn: async (args) => {
         try {
           const [page, perPage, options] = !args ? [] : [
@@ -242,12 +242,12 @@ export const usersApiInternal = api.injectEndpoints({
         ? []
         : [
           { type: "users", id: "LIST-users" },
-          ...result.items.map((record) => getTagsForUsers(record)).flat(),
+          ...result.items.map((record) => getTagsForUser(record)).flat(),
         ]
       ,
     }),
 
-    getFullListUsers: build.query<SerializedUsers[], UsersRecordFullListOptions|void>({
+    getFullListUsers: build.query<SerializedUser[], UserRecordFullListOptions|void>({
       queryFn: async (args) => {
         try {
           const options = !args ? undefined : {
@@ -266,12 +266,12 @@ export const usersApiInternal = api.injectEndpoints({
         ? []
         : [
           { type: "users", id: "LIST-users" },
-          ...result.map((record) => getTagsForUsers(record)).flat(),
+          ...result.map((record) => getTagsForUser(record)).flat(),
         ]
       ,
     }),
 
-    createUsers: build.mutation<SerializedUsers, { record: CreateUsers } & UsersRecordOptions>({
+    createUser: build.mutation<SerializedUser, { record: CreateUser } & UserRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -279,7 +279,7 @@ export const usersApiInternal = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeCreateUsers(args.record);
+          const serializedRecord = serializeCreateUser(args.record);
           const data = await pb.collection("users").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -292,7 +292,7 @@ export const usersApiInternal = api.injectEndpoints({
       ,
     }),
 
-    updateUsers: build.mutation<SerializedUsers, { record: UpdateUsers } & UsersRecordOptions>({
+    updateUser: build.mutation<SerializedUser, { record: UpdateUser } & UserRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -300,7 +300,7 @@ export const usersApiInternal = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeUpdateUsers(args.record);
+          const serializedRecord = serializeUpdateUser(args.record);
           const data = await pb.collection("users").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -312,7 +312,7 @@ export const usersApiInternal = api.injectEndpoints({
       ],
     }),
 
-    deleteUsers: build.mutation<boolean, string|({ id: string } & UsersCommonOptions)>({
+    deleteUser: build.mutation<boolean, string|({ id: string } & UserCommonOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -335,42 +335,42 @@ export const usersApiInternal = api.injectEndpoints({
 
 export const usersApi = {
   ...usersApiInternal,
-  useGetOneUsersQuery: function<T extends UsersExpand>(
-    args: Parameters<typeof usersApiInternal.useGetOneUsersQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof usersApiInternal.useGetOneUsersQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
+  useGetOneUserQuery: function<T extends UserExpand>(
+    args: Parameters<typeof usersApiInternal.useGetOneUserQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof usersApiInternal.useGetOneUserQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return usersApiInternal.useGetOneUsersQuery(args, {
+    return usersApiInternal.useGetOneUserQuery(args, {
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseUsers(result.data) as Users & {
-          expand: ResolvedUsersExpand<T>,
+        data: result.data && parseUser(result.data) as User & {
+          expand: ResolvedUserExpand<T>,
         },
-        currentData: result.currentData && parseUsers(result.currentData) as Users & {
-          expand: ResolvedUsersExpand<T>,
+        currentData: result.currentData && parseUser(result.currentData) as User & {
+          expand: ResolvedUserExpand<T>,
         },
       }),
     });
   },
 
-  useLazyGetOneUsersQuery: function<T extends UsersExpand>(
-    options?: Omit<Parameters<typeof usersApiInternal.useLazyGetOneUsersQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useLazyGetOneUserQuery: function<T extends UserExpand>(
+    options?: Omit<Parameters<typeof usersApiInternal.useLazyGetOneUserQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return usersApiInternal.useLazyGetOneUsersQuery({
+    return usersApiInternal.useLazyGetOneUserQuery({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseUsers(result.data) as Users & {
-          expand: ResolvedUsersExpand<T>,
+        data: result.data && parseUser(result.data) as User & {
+          expand: ResolvedUserExpand<T>,
         },
-        currentData: result.currentData && parseUsers(result.currentData) as Users & {
-          expand: ResolvedUsersExpand<T>,
+        currentData: result.currentData && parseUser(result.currentData) as User & {
+          expand: ResolvedUserExpand<T>,
         },
       }),
     });
   },
 
-  useGetListUsersQuery: function<T extends UsersExpand>(
+  useGetListUsersQuery: function<T extends UserExpand>(
     args: Parameters<typeof usersApiInternal.useGetListUsersQuery>[0] & { expand?: T },
     options?: Omit<Parameters<typeof usersApiInternal.useGetListUsersQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
@@ -380,21 +380,21 @@ export const usersApi = {
         ...result,
         data: result.data && {
           ...result.data,
-          items: result.data.items.map(parseUsers) as Array<Users & {
-            expand: ResolvedUsersExpand<T>,
+          items: result.data.items.map(parseUser) as Array<User & {
+            expand: ResolvedUserExpand<T>,
           }>,
         },
         currentData: result.currentData && {
           ...result.currentData,
-          items: result.currentData.items.map(parseUsers) as Array<Users & {
-            expand: ResolvedUsersExpand<T>,
+          items: result.currentData.items.map(parseUser) as Array<User & {
+            expand: ResolvedUserExpand<T>,
           }>,
         },
       }),
     });
   },
 
-  useLazyGetListUsersQuery: function<T extends UsersExpand>(
+  useLazyGetListUsersQuery: function<T extends UserExpand>(
     options?: Omit<Parameters<typeof usersApiInternal.useLazyGetListUsersQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return usersApiInternal.useLazyGetListUsersQuery({
@@ -403,21 +403,21 @@ export const usersApi = {
         ...result,
         data: result.data && {
           ...result.data,
-          items: result.data.items.map(parseUsers) as Array<Users & {
-            expand: ResolvedUsersExpand<T>,
+          items: result.data.items.map(parseUser) as Array<User & {
+            expand: ResolvedUserExpand<T>,
           }>,
         },
         currentData: result.currentData && {
           ...result.currentData,
-          items: result.currentData.items.map(parseUsers) as Array<Users & {
-            expand: ResolvedUsersExpand<T>,
+          items: result.currentData.items.map(parseUser) as Array<User & {
+            expand: ResolvedUserExpand<T>,
           }>,
         },
       }),
     });
   },
 
-  useGetFullListUsersQuery: function<T extends UsersExpand>(
+  useGetFullListUsersQuery: function<T extends UserExpand>(
     args: Parameters<typeof usersApiInternal.useGetFullListUsersQuery>[0] & { expand?: T },
     options?: Omit<Parameters<typeof usersApiInternal.useGetFullListUsersQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
@@ -425,59 +425,59 @@ export const usersApi = {
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data?.map(parseUsers) as Array<Users & {
-          expand: ResolvedUsersExpand<T>,
+        data: result.data?.map(parseUser) as Array<User & {
+          expand: ResolvedUserExpand<T>,
         }>,
-        currentData: result.currentData?.map(parseUsers) as Array<Users & {
-          expand: ResolvedUsersExpand<T>,
+        currentData: result.currentData?.map(parseUser) as Array<User & {
+          expand: ResolvedUserExpand<T>,
         }>,
       }),
     });
   },
 
-  useLazyGetFullListUsersQuery: function<T extends UsersExpand>(
+  useLazyGetFullListUsersQuery: function<T extends UserExpand>(
     options?: Omit<Parameters<typeof usersApiInternal.useLazyGetFullListUsersQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return usersApiInternal.useLazyGetFullListUsersQuery({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data?.map(parseUsers) as Array<Users & {
-          expand: ResolvedUsersExpand<T>,
+        data: result.data?.map(parseUser) as Array<User & {
+          expand: ResolvedUserExpand<T>,
         }>,
-        currentData: result.currentData?.map(parseUsers) as Array<Users & {
-          expand: ResolvedUsersExpand<T>,
+        currentData: result.currentData?.map(parseUser) as Array<User & {
+          expand: ResolvedUserExpand<T>,
         }>,
       }),
     });
   },
 
-  useCreateUsersMutation: function<T extends UsersExpand>(
-    options?: Omit<Parameters<typeof usersApiInternal.useCreateUsersMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useCreateUserMutation: function<T extends UserExpand>(
+    options?: Omit<Parameters<typeof usersApiInternal.useCreateUserMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return usersApiInternal.useCreateUsersMutation({
+    return usersApiInternal.useCreateUserMutation({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseUsers(result.data) as Users,
+        data: result.data && parseUser(result.data) as User,
       }),
     });
   },
 
-  useUpdateUsersMutation: function<T extends UsersExpand>(
-    options?: Omit<Parameters<typeof usersApiInternal.useUpdateUsersMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useUpdateUserMutation: function<T extends UserExpand>(
+    options?: Omit<Parameters<typeof usersApiInternal.useUpdateUserMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return usersApiInternal.useUpdateUsersMutation({
+    return usersApiInternal.useUpdateUserMutation({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseUsers(result.data) as Users,
+        data: result.data && parseUser(result.data) as User,
       }),
     });
   },
 };
 
-export type TestCollection = {
+export type TestRecord = {
   id: string;
   /** Must not be empty string. **/
   thisIsPlainText: string;
@@ -496,12 +496,12 @@ export type TestCollection = {
   thisIsJson: unknown;
   thisIsGeoPoint: { lat: number, lon: number };
   expand: {
-    thisIsRelation?: Users;
-    thisIsMultipleRelation?: TestCollection[];
+    thisIsRelation?: User;
+    thisIsMultipleRelation?: TestRecord[];
   };
 };
 
-export type SerializedTestCollection = {
+export type SerializedTestRecord = {
   id: string;
   /** Must not be empty string. **/
   thisIsPlainText: string;
@@ -520,12 +520,12 @@ export type SerializedTestCollection = {
   thisIsJson: unknown;
   thisIsGeoPoint: { lat: number, lon: number };
   expand: {
-    thisIsRelation?: SerializedUsers;
-    thisIsMultipleRelation?: SerializedTestCollection[];
+    thisIsRelation?: SerializedUser;
+    thisIsMultipleRelation?: SerializedTestRecord[];
   };
 };
 
-export type CreateTestCollection = {
+export type CreateTestRecord = {
   /** Must not be empty string. **/
   thisIsPlainText: string;
   thisIsRichText: RichText|null;
@@ -543,7 +543,7 @@ export type CreateTestCollection = {
   thisIsGeoPoint: { lat: number, lon: number };
 };
 
-export type SerializedCreateTestCollection = {
+export type SerializedCreateTestRecord = {
   /** Must not be empty string. **/
   thisIsPlainText: string;
   thisIsRichText: string;
@@ -561,7 +561,7 @@ export type SerializedCreateTestCollection = {
   thisIsGeoPoint: { lat: number, lon: number };
 };
 
-export type UpdateTestCollection = {
+export type UpdateTestRecord = {
   id: string;
   /** Must not be empty string. **/
   thisIsPlainText?: string;
@@ -583,7 +583,7 @@ export type UpdateTestCollection = {
   thisIsGeoPoint?: { lat: number, lon: number };
 };
 
-export type SerializedUpdateTestCollection = {
+export type SerializedUpdateTestRecord = {
   id: string;
   /** Must not be empty string. **/
   thisIsPlainText?: string;
@@ -605,27 +605,27 @@ export type SerializedUpdateTestCollection = {
   thisIsGeoPoint?: { lat: number, lon: number };
 };
 
-export type TestCollectionExpand = {
-  thisIsRelation?: UsersExpand;
-  thisIsMultipleRelation?: TestCollectionExpand;
+export type TestRecordExpand = {
+  thisIsRelation?: UserExpand;
+  thisIsMultipleRelation?: TestRecordExpand;
 };
 
-export type ResolvedTestCollectionExpand<T extends TestCollectionExpand> = {
+export type ResolvedTestRecordExpand<T extends TestRecordExpand> = {
   thisIsRelation: undefined extends T["thisIsRelation"]
     ? never
-    : TestCollection & { expand: ResolvedTestCollectionExpand<NonNullable<T["thisIsRelation"]>> }
+    : TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsRelation"]>> }
   ;
   thisIsMultipleRelation: undefined extends T["thisIsMultipleRelation"]
     ? never
-    : (TestCollection & { expand: ResolvedTestCollectionExpand<NonNullable<T["thisIsMultipleRelation"]>> })[]
+    : (TestRecord & { expand: ResolvedTestRecordExpand<NonNullable<T["thisIsMultipleRelation"]>> })[]
   ;
 };
 
-export type TestCollectionCommonOptions = {
+export type TestRecordCommonOptions = {
   fields?: Array<"id"|"thisIsPlainText"|"thisIsRichText"|"thisIsNumber"|"thisIsBoolean"|"thisIsEmail"|"thisIsUrl"|"thisIsDateTime"|"thisIsAutoDate"|"thisIsSelect"|"thisIsFile"|"thisIsMultipleFile"|"thisIsRelation"|"thisIsMultipleRelation"|"thisIsJson"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
-export type TestCollectionListOptions = TestCollectionCommonOptions & {
+export type TestRecordListOptions = TestRecordCommonOptions & {
   page?: number;
   perPage?: number;
   sort?: string;
@@ -633,30 +633,30 @@ export type TestCollectionListOptions = TestCollectionCommonOptions & {
   skipTotal?: boolean;
 };
 
-export type TestCollectionFullListOptions = TestCollectionListOptions & {
-  expand?: TestCollectionExpand;
+export type TestRecordFullListOptions = TestRecordListOptions & {
+  expand?: TestRecordExpand;
   batch?: number;
 };
 
-export type TestCollectionRecordOptions = TestCollectionCommonOptions & {
-  expand?: TestCollectionExpand;
+export type TestRecordRecordOptions = TestRecordCommonOptions & {
+  expand?: TestRecordExpand;
 };
 
-export type TestCollectionRecordListOptions = unknown
-  & TestCollectionRecordOptions
-  & TestCollectionListOptions
+export type TestRecordRecordListOptions = unknown
+  & TestRecordRecordOptions
+  & TestRecordListOptions
   & {
     page?: number;
     perPage?: number;
   }
 ;
 
-export type TestCollectionRecordFullListOptions =
-  & TestCollectionFullListOptions
-  & TestCollectionRecordOptions
+export type TestRecordRecordFullListOptions =
+  & TestRecordFullListOptions
+  & TestRecordRecordOptions
 ;
 
-export function parseTestCollection(record: SerializedTestCollection): TestCollection {
+export function parseTestRecord(record: SerializedTestRecord): TestRecord {
   return {
     ...record,
     thisIsRichText: record.thisIsRichText === "" ? null : record.thisIsRichText,
@@ -668,18 +668,18 @@ export function parseTestCollection(record: SerializedTestCollection): TestColle
     thisIsMultipleRelation: record.thisIsMultipleRelation.length === 0 ? null : record.thisIsMultipleRelation,
     expand: record.expand && {
       thisIsRelation: record.expand.thisIsRelation
-        ? parseUsers(record.expand.thisIsRelation)
+        ? parseUser(record.expand.thisIsRelation)
         : undefined
       ,
       thisIsMultipleRelation: record.expand.thisIsMultipleRelation
-        ? record.expand.thisIsMultipleRelation.map(parseTestCollection)
+        ? record.expand.thisIsMultipleRelation.map(parseTestRecord)
         : undefined
       ,
     },
   };
 }
 
-export function serializeTestCollection(record: TestCollection): SerializedTestCollection {
+export function serializeTestRecord(record: TestRecord): SerializedTestRecord {
   return {
     ...record,
     thisIsRichText: record.thisIsRichText ?? "",
@@ -691,18 +691,18 @@ export function serializeTestCollection(record: TestCollection): SerializedTestC
     thisIsMultipleRelation: record.thisIsMultipleRelation ?? [],
     expand: record.expand && {
       thisIsRelation: record.expand.thisIsRelation
-        ? serializeUsers(record.expand.thisIsRelation)
+        ? serializeUser(record.expand.thisIsRelation)
         : undefined
       ,
       thisIsMultipleRelation: record.expand.thisIsMultipleRelation
-        ? record.expand.thisIsMultipleRelation.map(serializeTestCollection)
+        ? record.expand.thisIsMultipleRelation.map(serializeTestRecord)
         : undefined
       ,
     },
   };
 }
 
-export function serializeCreateTestCollection(record: CreateTestCollection): SerializedCreateTestCollection {
+export function serializeCreateTestRecord(record: CreateTestRecord): SerializedCreateTestRecord {
   return {
     ...record,
     thisIsRichText: record.thisIsRichText ?? "",
@@ -714,7 +714,7 @@ export function serializeCreateTestCollection(record: CreateTestCollection): Ser
   };
 }
 
-export function serializeUpdateTestCollection(record: UpdateTestCollection): SerializedUpdateTestCollection {
+export function serializeUpdateTestRecord(record: UpdateTestRecord): SerializedUpdateTestRecord {
   return {
     ...record,
     thisIsRichText: record.thisIsRichText ?? "",
@@ -726,18 +726,18 @@ export function serializeUpdateTestCollection(record: UpdateTestCollection): Ser
   };
 }
 
-function getTagsForTestCollection(record: SerializedTestCollection): Tag[] {
+function getTagsForTestRecord(record: SerializedTestRecord): Tag[] {
   return ([
     { type: "testCollection", id: record.id },
-    ...(!record.expand.thisIsRelation ? [] : getTagsForUsers(record.expand.thisIsRelation)),
+    ...(!record.expand.thisIsRelation ? [] : getTagsForUser(record.expand.thisIsRelation)),
     record.expand.thisIsMultipleRelation && { type: "testCollection", id: `LIST-testCollection-${record.id}` } as const,
-    ...(record.expand.thisIsMultipleRelation ?? []).map((e) => getTagsForTestCollection(e)).flat(),
+    ...(record.expand.thisIsMultipleRelation ?? []).map((e) => getTagsForTestRecord(e)).flat(),
   ] as const).filter((t) => !!t);
 }
 
-export const testCollectionApiInternal = api.injectEndpoints({
+export const testRecordsApiInternal = api.injectEndpoints({
   endpoints: (build) => ({
-    getOneTestCollection: build.query<SerializedTestCollection, string|({ id: string } & TestCollectionRecordOptions)>({
+    getOneTestRecord: build.query<SerializedTestRecord, string|({ id: string } & TestRecordRecordOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -756,11 +756,11 @@ export const testCollectionApiInternal = api.injectEndpoints({
       },
       providesTags: (result, error, args) => !result
         ? []
-        : getTagsForTestCollection(result)
+        : getTagsForTestRecord(result)
       ,
     }),
 
-    getListTestCollection: build.query<ListResult<SerializedTestCollection>, TestCollectionRecordListOptions|void>({
+    getListTestRecords: build.query<ListResult<SerializedTestRecord>, TestRecordRecordListOptions|void>({
       queryFn: async (args) => {
         try {
           const [page, perPage, options] = !args ? [] : [
@@ -782,13 +782,13 @@ export const testCollectionApiInternal = api.injectEndpoints({
       providesTags: (result, error, args) => !result
         ? []
         : [
-          { type: "testCollection", id: "LIST-testCollection" },
-          ...result.items.map((record) => getTagsForTestCollection(record)).flat(),
+          { type: "testCollection", id: "LIST-testRecords" },
+          ...result.items.map((record) => getTagsForTestRecord(record)).flat(),
         ]
       ,
     }),
 
-    getFullListTestCollection: build.query<SerializedTestCollection[], TestCollectionRecordFullListOptions|void>({
+    getFullListTestRecords: build.query<SerializedTestRecord[], TestRecordRecordFullListOptions|void>({
       queryFn: async (args) => {
         try {
           const options = !args ? undefined : {
@@ -806,13 +806,13 @@ export const testCollectionApiInternal = api.injectEndpoints({
       providesTags: (result, error, args) => !result
         ? []
         : [
-          { type: "testCollection", id: "LIST-testCollection" },
-          ...result.map((record) => getTagsForTestCollection(record)).flat(),
+          { type: "testCollection", id: "LIST-testRecords" },
+          ...result.map((record) => getTagsForTestRecord(record)).flat(),
         ]
       ,
     }),
 
-    createTestCollection: build.mutation<SerializedTestCollection, { record: CreateTestCollection } & TestCollectionRecordOptions>({
+    createTestRecord: build.mutation<SerializedTestRecord, { record: CreateTestRecord } & TestRecordRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -820,7 +820,7 @@ export const testCollectionApiInternal = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeCreateTestCollection(args.record);
+          const serializedRecord = serializeCreateTestRecord(args.record);
           const data = await pb.collection("testCollection").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -829,11 +829,11 @@ export const testCollectionApiInternal = api.injectEndpoints({
       },
       invalidatesTags: (result, error, args) => !result
         ? []
-        : [{ type: "testCollection", id: "LIST-testCollection" }]
+        : [{ type: "testCollection", id: "LIST-testRecords" }]
       ,
     }),
 
-    updateTestCollection: build.mutation<SerializedTestCollection, { record: UpdateTestCollection } & TestCollectionRecordOptions>({
+    updateTestRecord: build.mutation<SerializedTestRecord, { record: UpdateTestRecord } & TestRecordRecordOptions>({
       queryFn: async (args) => {
         try {
           const options = {
@@ -841,7 +841,7 @@ export const testCollectionApiInternal = api.injectEndpoints({
             expand: getExpandString(args.expand),
             fields: getFieldsString(args.fields),
           };
-          const serializedRecord = serializeUpdateTestCollection(args.record);
+          const serializedRecord = serializeUpdateTestRecord(args.record);
           const data = await pb.collection("testCollection").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
@@ -853,7 +853,7 @@ export const testCollectionApiInternal = api.injectEndpoints({
       ],
     }),
 
-    deleteTestCollection: build.mutation<boolean, string|({ id: string } & TestCollectionCommonOptions)>({
+    deleteTestRecord: build.mutation<boolean, string|({ id: string } & TestRecordCommonOptions)>({
       queryFn: async (args) => {
         try {
           const id = typeof args === "string" ? args : args.id;
@@ -874,145 +874,145 @@ export const testCollectionApiInternal = api.injectEndpoints({
   }),
 });
 
-export const testCollectionApi = {
-  ...testCollectionApiInternal,
-  useGetOneTestCollectionQuery: function<T extends TestCollectionExpand>(
-    args: Parameters<typeof testCollectionApiInternal.useGetOneTestCollectionQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useGetOneTestCollectionQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
+export const testRecordsApi = {
+  ...testRecordsApiInternal,
+  useGetOneTestRecordQuery: function<T extends TestRecordExpand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetOneTestRecordQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useGetOneTestCollectionQuery(args, {
+    return testRecordsApiInternal.useGetOneTestRecordQuery(args, {
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseTestCollection(result.data) as TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
+        data: result.data && parseTestRecord(result.data) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
         },
-        currentData: result.currentData && parseTestCollection(result.currentData) as TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
+        currentData: result.currentData && parseTestRecord(result.currentData) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
         },
       }),
     });
   },
 
-  useLazyGetOneTestCollectionQuery: function<T extends TestCollectionExpand>(
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useLazyGetOneTestCollectionQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useLazyGetOneTestRecordQuery: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetOneTestRecordQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useLazyGetOneTestCollectionQuery({
+    return testRecordsApiInternal.useLazyGetOneTestRecordQuery({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseTestCollection(result.data) as TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
+        data: result.data && parseTestRecord(result.data) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
         },
-        currentData: result.currentData && parseTestCollection(result.currentData) as TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
+        currentData: result.currentData && parseTestRecord(result.currentData) as TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
         },
       }),
     });
   },
 
-  useGetListTestCollectionQuery: function<T extends TestCollectionExpand>(
-    args: Parameters<typeof testCollectionApiInternal.useGetListTestCollectionQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useGetListTestCollectionQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
+  useGetListTestRecordsQuery: function<T extends TestRecordExpand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useGetListTestCollectionQuery(args, {
+    return testRecordsApiInternal.useGetListTestRecordsQuery(args, {
       ...options,
       selectFromResult: (result) => ({
         ...result,
         data: result.data && {
           ...result.data,
-          items: result.data.items.map(parseTestCollection) as Array<TestCollection & {
-            expand: ResolvedTestCollectionExpand<T>,
+          items: result.data.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
           }>,
         },
         currentData: result.currentData && {
           ...result.currentData,
-          items: result.currentData.items.map(parseTestCollection) as Array<TestCollection & {
-            expand: ResolvedTestCollectionExpand<T>,
+          items: result.currentData.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
           }>,
         },
       }),
     });
   },
 
-  useLazyGetListTestCollectionQuery: function<T extends TestCollectionExpand>(
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useLazyGetListTestCollectionQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useLazyGetListTestRecordsQuery: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useLazyGetListTestCollectionQuery({
+    return testRecordsApiInternal.useLazyGetListTestRecordsQuery({
       ...options,
       selectFromResult: (result) => ({
         ...result,
         data: result.data && {
           ...result.data,
-          items: result.data.items.map(parseTestCollection) as Array<TestCollection & {
-            expand: ResolvedTestCollectionExpand<T>,
+          items: result.data.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
           }>,
         },
         currentData: result.currentData && {
           ...result.currentData,
-          items: result.currentData.items.map(parseTestCollection) as Array<TestCollection & {
-            expand: ResolvedTestCollectionExpand<T>,
+          items: result.currentData.items.map(parseTestRecord) as Array<TestRecord & {
+            expand: ResolvedTestRecordExpand<T>,
           }>,
         },
       }),
     });
   },
 
-  useGetFullListTestCollectionQuery: function<T extends TestCollectionExpand>(
-    args: Parameters<typeof testCollectionApiInternal.useGetFullListTestCollectionQuery>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useGetFullListTestCollectionQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
+  useGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
+    args: Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[0] & { expand?: T },
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useGetFullListTestRecordsQuery>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useGetFullListTestCollectionQuery(args, {
+    return testRecordsApiInternal.useGetFullListTestRecordsQuery(args, {
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data?.map(parseTestCollection) as Array<TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
+        data: result.data?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
         }>,
-        currentData: result.currentData?.map(parseTestCollection) as Array<TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
-        }>,
-      }),
-    });
-  },
-
-  useLazyGetFullListTestCollectionQuery: function<T extends TestCollectionExpand>(
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useLazyGetFullListTestCollectionQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
-  ) {
-    return testCollectionApiInternal.useLazyGetFullListTestCollectionQuery({
-      ...options,
-      selectFromResult: (result) => ({
-        ...result,
-        data: result.data?.map(parseTestCollection) as Array<TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
-        }>,
-        currentData: result.currentData?.map(parseTestCollection) as Array<TestCollection & {
-          expand: ResolvedTestCollectionExpand<T>,
+        currentData: result.currentData?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
         }>,
       }),
     });
   },
 
-  useCreateTestCollectionMutation: function<T extends TestCollectionExpand>(
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useCreateTestCollectionMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useLazyGetFullListTestRecordsQuery: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useLazyGetFullListTestRecordsQuery>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useCreateTestCollectionMutation({
+    return testRecordsApiInternal.useLazyGetFullListTestRecordsQuery({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseTestCollection(result.data) as TestCollection,
+        data: result.data?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        }>,
+        currentData: result.currentData?.map(parseTestRecord) as Array<TestRecord & {
+          expand: ResolvedTestRecordExpand<T>,
+        }>,
       }),
     });
   },
 
-  useUpdateTestCollectionMutation: function<T extends TestCollectionExpand>(
-    options?: Omit<Parameters<typeof testCollectionApiInternal.useUpdateTestCollectionMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  useCreateTestRecordMutation: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useCreateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
-    return testCollectionApiInternal.useUpdateTestCollectionMutation({
+    return testRecordsApiInternal.useCreateTestRecordMutation({
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data && parseTestCollection(result.data) as TestCollection,
+        data: result.data && parseTestRecord(result.data) as TestRecord,
+      }),
+    });
+  },
+
+  useUpdateTestRecordMutation: function<T extends TestRecordExpand>(
+    options?: Omit<Parameters<typeof testRecordsApiInternal.useUpdateTestRecordMutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+  ) {
+    return testRecordsApiInternal.useUpdateTestRecordMutation({
+      ...options,
+      selectFromResult: (result) => ({
+        ...result,
+        data: result.data && parseTestRecord(result.data) as TestRecord,
       }),
     });
   },

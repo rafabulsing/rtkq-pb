@@ -1,0 +1,10 @@
+{
+  "users": {
+    "singular": "user",
+    "plural": "users"
+  },
+  "testCollection": {
+    "singular": "testRecord",
+    "plural": "testRecords"
+  }
+}
