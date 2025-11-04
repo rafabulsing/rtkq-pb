@@ -438,6 +438,14 @@ class DateTimeField extends Field {
     }
     return `${this.name}: record.${this.name} ? formatISO(record.${this.name}) : "",`;
   }
+
+  getUpdateParser(): string | null {
+    return `${this.name}: record.${this.name} ? parseISO(record.${this.name}) : "",`;
+  }
+
+  getUpdateSerializer(): string | null {
+    return `${this.name}: record.${this.name} ? formatISO(record.${this.name}) : "",`;
+  }
 }
 
 class AutoDateTimeField extends Field {
