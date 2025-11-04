@@ -769,7 +769,7 @@ export function dbToTypes(dbPath: string, outputPath: string, configPath: string
     fileMustExist: true,
   });
 
-  const config: Record<string, CollectionConfig> = JSON.parse(fs.readFileSync(configPath).toString());
+  const config: Config = JSON.parse(fs.readFileSync(configPath).toString());
 
   const collections = (db
     .prepare(`SELECT * FROM _collections WHERE system = False`)
@@ -779,7 +779,7 @@ export function dbToTypes(dbPath: string, outputPath: string, configPath: string
       fields: (JSON.parse(c.fields) as UnknownDbField[])
         .filter((f) => !f.system)
       ,
-      config: config[c.name],
+      config: config.collections[c.name],
     }))
   ;
 
@@ -806,6 +806,10 @@ type DbCollection = Omit<RawDbCollection, "fields"> & {
   fields: UnknownDbField[],
   config: CollectionConfig,
 };
+
+type Config = {
+  collections: Record<string, CollectionConfig>;
+}
 
 type CollectionConfig = {
   singular: string;
