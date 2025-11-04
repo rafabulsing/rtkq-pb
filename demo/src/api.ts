@@ -81,8 +81,8 @@ export type SerializedCreateUsers = {
 
 export type UpdateUsers = {
   id: string;
-  name: string;
-  avatar: File;
+  name?: string;
+  avatar?: File;
   email?: Email,
   emailVisibility?: boolean,
   verified?: boolean,
@@ -100,8 +100,8 @@ export type UpdateUsers = {
 
 export type SerializedUpdateUsers = {
   id: string;
-  name: string;
-  avatar: File|undefined|"";
+  name?: string;
+  avatar?: File|undefined|"";
   email?: string,
   emailVisibility?: boolean,
   verified?: boolean,
@@ -490,6 +490,7 @@ export type TestCollection = {
   thisIsAutoDate: Date;
   thisIsSelect: "somebody"|"once"|"told"|"me";
   thisIsFile: string;
+  thisIsMultipleFile: string[];
   thisIsRelation: Relation|null;
   thisIsMultipleRelation: Relation[]|null;
   thisIsJson: unknown;
@@ -513,6 +514,7 @@ export type SerializedTestCollection = {
   thisIsAutoDate: string;
   thisIsSelect: "somebody"|"once"|"told"|"me";
   thisIsFile: string;
+  thisIsMultipleFile: string[];
   thisIsRelation: string;
   thisIsMultipleRelation: string[];
   thisIsJson: unknown;
@@ -534,6 +536,7 @@ export type CreateTestCollection = {
   thisIsDateTime: Date|null;
   thisIsSelect: "somebody"|"once"|"told"|"me";
   thisIsFile: File;
+  thisIsMultipleFile: File[];
   thisIsRelation: Relation|null;
   thisIsMultipleRelation: Relation[]|null;
   thisIsJson: unknown;
@@ -551,6 +554,7 @@ export type SerializedCreateTestCollection = {
   thisIsDateTime: string;
   thisIsSelect: "somebody"|"once"|"told"|"me";
   thisIsFile: File|undefined|"";
+  thisIsMultipleFile: File[]|undefined|[];
   thisIsRelation: string;
   thisIsMultipleRelation: string[];
   thisIsJson: unknown;
@@ -560,37 +564,45 @@ export type SerializedCreateTestCollection = {
 export type UpdateTestCollection = {
   id: string;
   /** Must not be empty string. **/
-  thisIsPlainText: string;
-  thisIsRichText: RichText|null;
-  thisIsNumber: number;
-  thisIsBoolean: boolean;
-  thisIsEmail: Email|null;
-  thisIsUrl: Url|null;
-  thisIsDateTime: Date|null;
-  thisIsSelect: "somebody"|"once"|"told"|"me";
-  thisIsFile: File;
-  thisIsRelation: Relation|null;
-  thisIsMultipleRelation: Relation[]|null;
-  thisIsJson: unknown;
-  thisIsGeoPoint: { lat: number, lon: number };
+  thisIsPlainText?: string;
+  thisIsRichText?: RichText|null;
+  thisIsNumber?: number;
+  thisIsBoolean?: boolean;
+  thisIsEmail?: Email|null;
+  thisIsUrl?: Url|null;
+  thisIsDateTime?: Date|null;
+  thisIsSelect?: "somebody"|"once"|"told"|"me";
+  thisIsFile?: File;
+  thisIsMultipleFile?: File[];
+  thisIsMultipleFileAppend?: File[];
+  thisIsMultipleFilePrepend?: File[];
+  thisIsMultipleFileRemove?: string[];
+  thisIsRelation?: Relation|null;
+  thisIsMultipleRelation?: Relation[]|null;
+  thisIsJson?: unknown;
+  thisIsGeoPoint?: { lat: number, lon: number };
 };
 
 export type SerializedUpdateTestCollection = {
   id: string;
   /** Must not be empty string. **/
-  thisIsPlainText: string;
-  thisIsRichText: string;
-  thisIsNumber: number;
-  thisIsBoolean: boolean;
-  thisIsEmail: string;
-  thisIsUrl: string;
-  thisIsDateTime: string;
-  thisIsSelect: "somebody"|"once"|"told"|"me";
-  thisIsFile: File|undefined|"";
-  thisIsRelation: string;
-  thisIsMultipleRelation: string[];
-  thisIsJson: unknown;
-  thisIsGeoPoint: { lat: number, lon: number };
+  thisIsPlainText?: string;
+  thisIsRichText?: string;
+  thisIsNumber?: number;
+  thisIsBoolean?: boolean;
+  thisIsEmail?: string;
+  thisIsUrl?: string;
+  thisIsDateTime?: string;
+  thisIsSelect?: "somebody"|"once"|"told"|"me";
+  thisIsFile?: File|undefined|"";
+  thisIsMultipleFile?: File[]|undefined|[];
+  "thisIsMultipleFile+"?: File[];
+  "+thisIsMultipleFile"?: File[];
+  "thisIsMultipleFile-"?: string[];
+  thisIsRelation?: string;
+  thisIsMultipleRelation?: string[];
+  thisIsJson?: unknown;
+  thisIsGeoPoint?: { lat: number, lon: number };
 };
 
 export type TestCollectionExpand = {
@@ -610,7 +622,7 @@ export type ResolvedTestCollectionExpand<T extends TestCollectionExpand> = {
 };
 
 export type TestCollectionCommonOptions = {
-  fields?: Array<"id"|"thisIsPlainText"|"thisIsRichText"|"thisIsNumber"|"thisIsBoolean"|"thisIsEmail"|"thisIsUrl"|"thisIsDateTime"|"thisIsAutoDate"|"thisIsSelect"|"thisIsFile"|"thisIsRelation"|"thisIsMultipleRelation"|"thisIsJson"|"thisIsGeoPoint"|"created"|"updated">;
+  fields?: Array<"id"|"thisIsPlainText"|"thisIsRichText"|"thisIsNumber"|"thisIsBoolean"|"thisIsEmail"|"thisIsUrl"|"thisIsDateTime"|"thisIsAutoDate"|"thisIsSelect"|"thisIsFile"|"thisIsMultipleFile"|"thisIsRelation"|"thisIsMultipleRelation"|"thisIsJson"|"thisIsGeoPoint"|"created"|"updated">;
 };
 
 export type TestCollectionListOptions = TestCollectionCommonOptions & {

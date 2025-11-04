@@ -40,10 +40,10 @@ abstract class Field {
   }
 
   getUpdateParsed(): string|null {
-    return `${this.name}: ${this.getCreateParsedType()};`;
+    return `${this.name}?: ${this.getCreateParsedType()};`;
   }
   getUpdateSerialized(): string|null {
-    return `${this.name}: ${this.getUpdateSerializedType()};`;
+    return `${this.name}?: ${this.getUpdateSerializedType()};`;
   }
   
   getParser(): string|null {

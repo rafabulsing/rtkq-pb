@@ -8,5 +8,4 @@
 - unit tests
   - will probably require breaking the types.mu template into multiple smaller templates
 - hook to run script after every db schema change
-- allow for partial updates (sending only some of the fields required)
 - add TSDoc comment for other relevant properties of field
