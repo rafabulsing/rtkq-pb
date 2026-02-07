@@ -743,7 +743,7 @@ export function schemaToTypes(collections: DbCollection[]): string {
 
             return {
               name: f.name,
-              resolvedTo: upperCaseFirstChar(resolvedTo.config.singular),
+              singularUpperCase: upperCaseFirstChar(resolvedTo.config.singular),
               resolvedToCollection: resolvedTo.name,
               collection: c.name,
               isMultiple: f.maxSelect > 1,
@@ -779,7 +779,12 @@ export function dbToTypes(dbPath: string, outputPath: string, configPath: string
       fields: (JSON.parse(c.fields) as UnknownDbField[])
         .filter((f) => !f.system)
       ,
-      config: config.collections[c.name],
+      // Get names from config, otherwise infer them if options allow it
+      config: config.collections[c.name]
+        ?? !config.options.inferRecordNames ? undefined : {
+        singular: c.name.slice(0, -1),
+        plural: c.name,
+      },
     }))
   ;
 
@@ -808,6 +813,9 @@ type DbCollection = Omit<RawDbCollection, "fields"> & {
 };
 
 type Config = {
+  options: {
+    inferRecordNames: boolean;
+  };
   collections: Record<string, CollectionConfig>;
 }
 

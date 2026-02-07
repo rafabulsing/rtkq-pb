@@ -57,7 +57,7 @@ export type {{singularUpperCase}} = {
   {{#includeExpand}}
   expand: {
     {{#expand}}
-    {{name}}?: {{resolvedTo}}{{#isMultiple}}[]{{/isMultiple}};
+    {{name}}?: {{singularUpperCase}}{{#isMultiple}}[]{{/isMultiple}};
     {{/expand}}
   };
   {{/includeExpand}}
@@ -79,7 +79,7 @@ export type Serialized{{singularUpperCase}} = {
   {{#includeExpand}}
   expand: {
     {{#expand}}
-    {{name}}?: Serialized{{resolvedTo}}{{#isMultiple}}[]{{/isMultiple}};
+    {{name}}?: Serialized{{singularUpperCase}}{{#isMultiple}}[]{{/isMultiple}};
     {{/expand}}
   };
   {{/includeExpand}}
@@ -183,7 +183,7 @@ export type SerializedUpdate{{singularUpperCase}} = {
 
 export type {{singularUpperCase}}Expand = {
   {{#expand}}
-  {{name}}?: {{resolvedTo}}Expand;
+  {{name}}?: {{singularUpperCase}}Expand;
   {{/expand}}
   {{^expand}}
   [key: string]: never;  
@@ -249,7 +249,7 @@ export function parse{{singularUpperCase}}(record: Serialized{{singularUpperCase
     expand: record.expand && {
       {{#expand}}
       {{name}}: record.expand.{{name}}
-        ? {{^isMultiple}}parse{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(parse{{resolvedTo}}){{/isMultiple}}
+        ? {{^isMultiple}}parse{{singularUpperCase}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(parse{{singularUpperCase}}){{/isMultiple}}
         : undefined
       ,
       {{/expand}}
@@ -270,7 +270,7 @@ export function serialize{{singularUpperCase}}(record: {{singularUpperCase}}): S
     expand: record.expand && {
       {{#expand}}
       {{name}}: record.expand.{{name}}
-        ? {{^isMultiple}}serialize{{resolvedTo}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(serialize{{resolvedTo}}){{/isMultiple}}
+        ? {{^isMultiple}}serialize{{singularUpperCase}}(record.expand.{{name}}){{/isMultiple}}{{#isMultiple}}record.expand.{{name}}.map(serialize{{singularUpperCase}}){{/isMultiple}}
         : undefined
       ,
       {{/expand}}
@@ -311,11 +311,11 @@ function getTagsFor{{singularUpperCase}}(record: Serialized{{singularUpperCase}}
     { type: "{{name}}", id: record.id },
     {{#expand}}
     {{#isMultiple}}
-    record.expand.{{name}} && { type: "{{resolvedToCollection}}", id: `LIST-{{collection}}-${record.id}` } as const,
-    ...(record.expand.{{name}} ?? []).map((e) => getTagsFor{{resolvedTo}}(e)).flat(),
+    record.expand?.{{name}} && { type: "{{resolvedToCollection}}", id: `LIST-{{collection}}-${record.id}` } as const,
+    ...(record.expand?.{{name}} ?? []).map((e) => getTagsFor{{singularUpperCase}}(e)).flat(),
     {{/isMultiple}}
     {{^isMultiple}}
-    ...(!record.expand.{{name}} ? [] : getTagsFor{{resolvedTo}}(record.expand.{{name}})),
+    ...(!record.expand?.{{name}} ? [] : getTagsFor{{singularUpperCase}}(record.expand.{{name}})),
     {{/isMultiple}}
     {{/expand}}
   ] as const).filter((t) => !!t);
@@ -545,7 +545,7 @@ export const {{plural}}Api = {
   },
 
   useGetFullList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
-    args: Parameters<typeof {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query>[0] & { expand?: T },
+    args?: Parameters<typeof {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query>[0] & { expand?: T },
     options?: Omit<Parameters<typeof {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined },
   ) {
     return {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query(args, {
