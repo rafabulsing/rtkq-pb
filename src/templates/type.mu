@@ -337,7 +337,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
           const data = await pb.collection("{{name}}").getOne(id, options);
           return { data };
         } catch (error: any) {
-          return { error };
+          return { error: JSON.parse(JSON.stringify(error)) };
         }
       },
       providesTags: (result, error, args) => !result
@@ -362,7 +362,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
           const data = await pb.collection("{{name}}").getList(page, perPage, options);
           return { data };
         } catch (error: any) {
-          return { error };
+          return { error: JSON.parse(JSON.stringify(error)) };
         }
       },
       providesTags: (result, error, args) => !result
@@ -386,7 +386,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
           const data = await pb.collection("{{name}}").getFullList(options);
           return { data };
         } catch (error: any) {
-          return { error };
+          return { error: JSON.parse(JSON.stringify(error)) };
         }
       },
       providesTags: (result, error, args) => !result
@@ -410,7 +410,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
           const data = await pb.collection("{{name}}").create(serializedRecord, options);
           return { data };
         } catch (error: any) {
-          return { error };
+          return { error: JSON.parse(JSON.stringify(error)) };
         }
       },
       invalidatesTags: (result, error, args) => !result
@@ -431,7 +431,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
           const data = await pb.collection("{{name}}").update(args.record.id, serializedRecord, options);
           return { data };
         } catch (error: any) {
-          return { error };
+          return { error: JSON.parse(JSON.stringify(error)) };
         }
       },
       invalidatesTags: (result, error, args) => [
@@ -450,7 +450,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
           const data = await pb.collection("{{name}}").delete(id, options);
           return { data };
         } catch (error: any) {
-          return { error };
+          return { error: JSON.parse(JSON.stringify(error)) };
         }
       },
       invalidatesTags: (result, error, args) => [
