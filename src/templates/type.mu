@@ -466,7 +466,7 @@ export const {{plural}}Api = {
   ...{{plural}}ApiInternal,
   useGetOne{{singularUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
     args: Parameters<typeof {{plural}}ApiInternal.useGetOne{{singularUpperCase}}Query>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useGetOne{{singularUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useGetOne{{singularUpperCase}}Query>[1],
   ) {
     return {{plural}}ApiInternal.useGetOne{{singularUpperCase}}Query(args, {
       ...options,
@@ -483,7 +483,7 @@ export const {{plural}}Api = {
   },
 
   useLazyGetOne{{singularUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useLazyGetOne{{singularUpperCase}}Query>[0], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useLazyGetOne{{singularUpperCase}}Query>[0],
   ) {
     return {{plural}}ApiInternal.useLazyGetOne{{singularUpperCase}}Query({
       ...options,
@@ -501,7 +501,7 @@ export const {{plural}}Api = {
 
   useGetList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
     args: Parameters<typeof {{plural}}ApiInternal.useGetList{{pluralUpperCase}}Query>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useGetList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useGetList{{pluralUpperCase}}Query>[1],
   ) {
     return {{plural}}ApiInternal.useGetList{{pluralUpperCase}}Query(args, {
       ...options,
@@ -524,7 +524,7 @@ export const {{plural}}Api = {
   },
 
   useLazyGetList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useLazyGetList{{pluralUpperCase}}Query>[0], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useLazyGetList{{pluralUpperCase}}Query>[0],
   ) {
     return {{plural}}ApiInternal.useLazyGetList{{pluralUpperCase}}Query({
       ...options,
@@ -548,7 +548,7 @@ export const {{plural}}Api = {
 
   useGetFullList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
     args?: Parameters<typeof {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query>[0] & { expand?: T },
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query>[1], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query>[1],
   ) {
     return {{plural}}ApiInternal.useGetFullList{{pluralUpperCase}}Query(args, {
       ...options,
@@ -565,7 +565,7 @@ export const {{plural}}Api = {
   },
 
   useLazyGetFullList{{pluralUpperCase}}Query: function<T extends {{singularUpperCase}}Expand>(
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useLazyGetFullList{{pluralUpperCase}}Query>[0], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useLazyGetFullList{{pluralUpperCase}}Query>[0],
   ) {
     return {{plural}}ApiInternal.useLazyGetFullList{{pluralUpperCase}}Query({
       ...options,
@@ -582,7 +582,7 @@ export const {{plural}}Api = {
   },
 
   useCreate{{singularUpperCase}}Mutation: function<T extends {{singularUpperCase}}Expand>(
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useCreate{{singularUpperCase}}Mutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useCreate{{singularUpperCase}}Mutation>[0],
   ) {
     return {{plural}}ApiInternal.useCreate{{singularUpperCase}}Mutation({
       ...options,
@@ -594,7 +594,7 @@ export const {{plural}}Api = {
   },
 
   useUpdate{{singularUpperCase}}Mutation: function<T extends {{singularUpperCase}}Expand>(
-    options?: Omit<Parameters<typeof {{plural}}ApiInternal.useUpdate{{singularUpperCase}}Mutation>[0], "selectFromResult"> & { selectFromResult?: undefined },
+    options?: Parameters<typeof {{plural}}ApiInternal.useUpdate{{singularUpperCase}}Mutation>[0],
   ) {
     return {{plural}}ApiInternal.useUpdate{{singularUpperCase}}Mutation({
       ...options,
