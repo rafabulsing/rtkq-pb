@@ -32,6 +32,8 @@ type Relation = Flavor<string, "Relation">;
 
 export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
 
+pb.autoCancellation(false);
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: pb.baseUrl }),
   endpoints: () => ({}),
