@@ -345,7 +345,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       providesTags: (result, error, args) => !result
-        ? []
+        ? ["{{name}}"]
         : getTagsFor{{singularUpperCase}}(result)
       ,
     }),
@@ -370,7 +370,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       providesTags: (result, error, args) => !result
-        ? []
+        ? ["{{name}}"]
         : [
           { type: "{{name}}", id: "LIST-{{plural}}" },
           ...result.items.map((record) => getTagsFor{{singularUpperCase}}(record)).flat(),
@@ -394,7 +394,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       providesTags: (result, error, args) => !result
-        ? []
+        ? ["{{name}}"]
         : [
           { type: "{{name}}", id: "LIST-{{plural}}" },
           ...result.map((record) => getTagsFor{{singularUpperCase}}(record)).flat(),
@@ -418,7 +418,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       invalidatesTags: (result, error, args) => !result
-        ? []
+        ? ["{{name}}"]
         : [{ type: "{{name}}", id: "LIST-{{plural}}" }]
       ,
     }),
