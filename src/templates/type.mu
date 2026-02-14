@@ -4,6 +4,13 @@ import PocketBase, { RecordService, ListResult } from "pocketbase";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { parseISO, formatISO } from "date-fns";
+{{#options.importPocketbase}}
+{{{.}}}
+{{/options.importPocketbase}}
+{{^options.importPocketbase}}
+
+export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
+{{/options.importPocketbase}}
 
 export interface TypedPockedBase extends PocketBase {
   collection(idOrName: string): RecordService<never>;
@@ -29,10 +36,6 @@ type Email = Flavor<string, "Email">;
 type RichText = Flavor<string, "RichText">;
 type Url = Flavor<string, "Url">;
 type Relation = Flavor<string, "Relation">;
-
-export const pb = new PocketBase("http://127.0.0.1:8090") as TypedPockedBase;
-
-pb.autoCancellation(false);
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: pb.baseUrl }),

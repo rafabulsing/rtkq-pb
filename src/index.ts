@@ -693,7 +693,7 @@ const fieldClassesMap = Object.fromEntries(
   fieldClasses.map((fieldType) => [fieldType.type, fieldType]),
 );
 
-export function schemaToTypes(collections: DbCollection[]): string {
+export function schemaToTypes(collections: DbCollection[], options: ConfigOptions): string {
   const typeTemplate = fs.readFileSync(path.join(__dirname, "templates", "type.mu")).toString();
   
   return mustache.render(typeTemplate, {
@@ -752,6 +752,7 @@ export function schemaToTypes(collections: DbCollection[]): string {
         ,
       };
     }),
+    options,
   });
 }
 
@@ -794,7 +795,7 @@ export function dbToTypes(dbPath: string, outputPath: string, configPath: string
     return;
   }
 
-  const types = schemaToTypes(collections as DbCollection[]);
+  const types = schemaToTypes(collections as DbCollection[], config.options);
 
   fs.writeFileSync(outputPath, types);
 }
@@ -812,10 +813,13 @@ type DbCollection = Omit<RawDbCollection, "fields"> & {
   config: CollectionConfig,
 };
 
+type ConfigOptions = {
+  inferRecordNames: boolean;
+  importPocketbase?: string;
+}
+
 type Config = {
-  options: {
-    inferRecordNames: boolean;
-  };
+  options: ConfigOptions;
   collections: Record<string, CollectionConfig>;
 }
 
