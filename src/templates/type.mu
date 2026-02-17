@@ -55,7 +55,7 @@ export type {{singularUpperCase}} = {
   {{#tsDoc}}
   {{&.}}
   {{/tsDoc}}
-  {{&serialized}}
+  {{&printed}}
   {{/fields}}
   {{#isAuthCollection}}
   email: string,
@@ -73,12 +73,12 @@ export type {{singularUpperCase}} = {
 
 export type Create{{singularUpperCase}} = {
   {{#fields}}
-  {{#createSerialized}}
+  {{#createPrinted}}
   {{#tsDoc}}
   {{&.}}
   {{/tsDoc}}
-  {{&createSerialized}}
-  {{/createSerialized}}
+  {{&createPrinted}}
+  {{/createPrinted}}
   {{/fields}}
   {{#isAuthCollection}}
   email: string,
@@ -92,12 +92,12 @@ export type Create{{singularUpperCase}} = {
 export type Update{{singularUpperCase}} = {
   id: string;
   {{#fields}}
-  {{#updateSerialized}}
+  {{#updatePrinted}}
   {{#tsDoc}}
   {{&.}}
   {{/tsDoc}}
-  {{&updateSerialized}}
-  {{/updateSerialized}}
+  {{&updatePrinted}}
+  {{/updatePrinted}}
   {{/fields}}
   {{^isAuthCollection}}
 };

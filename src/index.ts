@@ -509,9 +509,9 @@ export function schemaToTypes(collections: DbCollection[], options: ConfigOption
         isAuthCollection: c.type === "auth",
         fields: fields.map((f) => ({
           name: f.name,
-          serialized: f.getTypePrinted(),
-          createSerialized: f.getCreatePrinted(),
-          updateSerialized: f.getUpdatePrinted(),
+          printed: f.getTypePrinted(),
+          createPrinted: f.getCreatePrinted(),
+          updatePrinted: f.getUpdatePrinted(),
           isFile: f instanceof FileField,
           isMultiple: "mode" in f && f.mode === "multiple",
           isAuto: f instanceof AutoDateTimeField,
