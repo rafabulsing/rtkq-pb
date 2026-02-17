@@ -8,61 +8,26 @@ abstract class Field {
   readonly name: string;
   static readonly type: string;
 
-  abstract getParsedType(): string;
-  abstract getSerializedType(): string;
+  abstract getType(): string;
 
-  getCreateParsedType(): string {
-    return this.getParsedType();
-  }
-  getCreateSerializedType(): string {
-    return this.getSerializedType();
+  getCreateType(): string {
+    return this.getType();
   }
 
-  getUpdateParsedType(): string {
-    return this.getParsedType();
-  }
-  getUpdateSerializedType(): string {
-    return this.getSerializedType();
+  getUpdateType(): string {
+    return this.getType();
   }
 
-  getParsed(): string {
-    return `${this.name}: ${this.getParsedType()};`;
-  }
-  getSerialized(): string {
-    return `${this.name}: ${this.getSerializedType()};`;
+  getTypePrinted(): string {
+    return `${this.name}: ${this.getType()};`;
   }
 
-  getCreateParsed(): string|null {
-    return `${this.name}: ${this.getCreateParsedType()};`;
-  }
-  getCreateSerialized(): string|null {
-    return `${this.name}: ${this.getUpdateSerializedType()};`;
+  getCreatePrinted(): string|null {
+    return `${this.name}: ${this.getUpdateType()};`;
   }
 
-  getUpdateParsed(): string|null {
-    return `${this.name}?: ${this.getCreateParsedType()};`;
-  }
-  getUpdateSerialized(): string|null {
-    return `${this.name}?: ${this.getUpdateSerializedType()};`;
-  }
-  
-  getParser(): string|null {
-    return null;
-  }
-  getSerializer(): string|null {
-    return null;
-  }
-  getCreateParser(): string|null {
-    return this.getParser();
-  }
-  getCreateSerializer(): string|null {
-    return this.getSerializer();
-  }
-  getUpdateParser(): string|null {
-    return this.getParser();
-  }
-  getUpdateSerializer(): string|null {
-    return this.getSerializer();
+  getUpdatePrinted(): string|null {
+    return `${this.name}?: ${this.getUpdateType()};`;
   }
 
   getTsDoc(): string|null {
@@ -229,10 +194,7 @@ class PlainTextField extends Field {
 
     this.required = field.required;
   }
-  getParsedType(): string {
-    return "string";
-  }
-  getSerializedType(): string {
+  getType(): string {
     return "string";
   }
   getTsDoc(): string | null {
@@ -257,29 +219,8 @@ abstract class SpecialTextField extends Field {
     this.required = field.required;
   }
 
-  getParsedType(): string {
-    if (this.required) {
-      return this.flavorType;
-    }
-    return `${this.flavorType}|null`;
-  }
-
-  getSerializedType(): string {
+  getType(): string {
     return "string";
-  }
-
-  getParser(): string | null {
-    if (this.required) {
-      return null;
-    }
-    return `${this.name}: record.${this.name} === "" ? null : record.${this.name},`;
-  }
-
-  getSerializer(): string | null {
-    if (this.required) {
-      return null;
-    }
-    return `${this.name}: record.${this.name} ?? "",`;
   }
 
   getTsDoc(): string | null {
@@ -315,10 +256,7 @@ class NumberField extends Field {
 
     this.required = field.required;
   }
-  getParsedType(): string {
-    return "number";
-  }
-  getSerializedType(): string {
+  getType(): string {
     return "number";
   }
   getTsDoc(): string|null {
@@ -360,42 +298,11 @@ class RelationField extends Field {
     this.required = field.required;
   }
 
-  getParsedType(): string {
-    return this.maxSelect === 1
-      ? (this.required ? "Relation" : "Relation|null")
-      : (this.required ? "Relation[]" : "Relation[]|null")
-    ;
-  }
-
-  getSerializedType(): string {
+  getType(): string {
     return this.maxSelect === 1
       ? "string"
       : "string[]"
     ;
-  }
-
-  getParser(): string | null {
-    if (this.required) {
-      return null;
-    }
-
-    if (this.maxSelect === 1) {
-      return `${this.name}: record.${this.name} === "" ? null : record.${this.name},`;
-    }
-
-    return `${this.name}: record.${this.name}.length === 0 ? null : record.${this.name},`;
-  }
-
-  getSerializer(): string | null {
-    if (this.required) {
-      return null;
-    }
-
-    if (this.maxSelect === 1) {
-      return `${this.name}: record.${this.name} ?? "",`;
-    }
-
-    return `${this.name}: record.${this.name} ?? [],`;
   }
 }
 
@@ -413,38 +320,8 @@ class DateTimeField extends Field {
     this.required = field.required;
   }
 
-  getParsedType(): string {
-    if (this.required) {
-      return "Date";
-    }
-    return "Date|null";
-  }
-
-  getSerializedType(): string {
+  getType(): string {
     return "string";
-  }
-
-  getParser(): string | null {
-    if (this.required) {
-      return `${this.name}: parseISO(record.${this.name}),`;
-    }
-    
-    return `${this.name}: record.${this.name} === "" ? null : parseISO(record.${this.name}),`;
-  }
-
-  getSerializer(): string | null {
-    if (this.required) {
-      return `${this.name}: formatISO(record.${this.name}),`;
-    }
-    return `${this.name}: record.${this.name} ? formatISO(record.${this.name}) : "",`;
-  }
-
-  getUpdateParser(): string | null {
-    return `${this.name}: record.${this.name} ? parseISO(record.${this.name}) : "",`;
-  }
-
-  getUpdateSerializer(): string | null {
-    return `${this.name}: record.${this.name} ? formatISO(record.${this.name}) : "",`;
   }
 }
 
@@ -455,48 +332,15 @@ class AutoDateTimeField extends Field {
     super(field);
   }
 
-  getParsedType(): string {
-    return "Date";
-  }
-
-  getSerializedType(): string {
+  getType(): string {
     return "string";
   }
 
-  getParser(): string | null {
-    return `${this.name}: parseISO(record.${this.name}),`;
-  }
-
-  getSerializer(): string | null {
-    return `${this.name}: formatISO(record.${this.name}),`;
-  }
-
-  getCreateParser(): string|null {
-    return null;
-  }
-  getCreateSerializer(): string|null {
-    return null;
-  }
-  getUpdateParser(): string|null {
-    return null;
-  }
-  getUpdateSerializer(): string|null {
+  getCreatePrinted(): string|null {
     return null;
   }
 
-  getCreateParsed(): string|null {
-    return null;
-  }
-
-  getCreateSerialized(): string|null {
-    return null;
-  }
-
-  getUpdateParsed(): string|null {
-    return null;
-  }
-
-  getUpdateSerialized(): string|null {
+  getUpdatePrinted(): string|null {
     return null;
   }
 }
@@ -506,10 +350,7 @@ class BooleanField extends Field {
   constructor(field: UnknownField) {
     super(field);
   }
-  getParsedType(): string {
-    return "boolean";
-  }
-  getSerializedType(): string {
+  getType(): string {
     return "boolean";
   }
 }
@@ -519,10 +360,7 @@ class JsonField extends Field {
   constructor(field: UnknownField) {
     super(field);
   }
-  getParsedType(): string {
-    return "unknown";
-  }
-  getSerializedType(): string {
+  getType(): string {
     return "unknown";
   }
 }
@@ -564,16 +402,7 @@ class SelectField extends Field {
     this.maxSelect = field.maxSelect;
   }
 
-  getParsedType(): string {
-    const valuesType = this.values.map((v) => `"${v}"`).join("|");
-
-    return this.maxSelect === 1
-      ? valuesType
-      : `Array<${valuesType}>`
-    ;
-  }
-
-  getSerializedType(): string {
+  getType(): string {
     const valuesType = this.values.map((v) => `"${v}"`).join("|");
 
     return this.maxSelect === 1
@@ -597,62 +426,31 @@ class FileField extends Field {
     this.maxSelect = field.maxSelect;
   }
 
-  getParsedType(): string {
+  getType(): string {
     return this.maxSelect === 1
       ? "string"
       : "string[]"
     ;
   }
 
-  getSerializedType(): string {
-    return this.maxSelect === 1
-      ? "string"
-      : "string[]"
-    ;
-  }
-
-  getCreateParsedType(): string {
+  getCreateType(): string {
     return this.maxSelect === 1
       ? "File"
       : "File[]"
     ;
   }
 
-  getCreateSerializedType(): string {
-    return this.maxSelect === 1
-      ? "File"
-      : "File[]"
-    ;
-  }
-
-  getUpdateParsedType(): string {
+  getUpdateType(): string {
     return this.maxSelect === 1
       ? "File|undefined|\"\""
       : "File[]|undefined|[]"
     ;
   }
 
-  getUpdateSerializedType(): string {
+  getUpdatePrinted(): string {
     return this.maxSelect === 1
-      ? "File|undefined|\"\""
-      : "File[]|undefined|[]"
-    ;
-  }
-
-  getUpdateParsed(): string {
-    return this.maxSelect === 1
-      ? super.getUpdateParsed()!
-      : super.getUpdateParsed() + `
-  ${this.name}Append?: File[];
-  ${this.name}Prepend?: File[];
-  ${this.name}Remove?: string[];`
-    ;
-  }
-
-  getUpdateSerialized(): string {
-    return this.maxSelect === 1
-      ? super.getUpdateSerialized()!
-      : super.getUpdateSerialized() + `
+      ? super.getUpdatePrinted()!
+      : super.getUpdatePrinted() + `
   "${this.name}+"?: File[];
   "+${this.name}"?: File[];
   "${this.name}-"?: string[];`
@@ -665,10 +463,7 @@ class GeoPointField extends Field {
   constructor(field: UnknownField) {
     super(field);
   }
-  getParsedType(): string {
-    return "{ lat: number, lon: number }";
-  }
-  getSerializedType(): string {
+  getType(): string {
     return "{ lat: number, lon: number }";
   }
 }
@@ -714,21 +509,12 @@ export function schemaToTypes(collections: DbCollection[], options: ConfigOption
         isAuthCollection: c.type === "auth",
         fields: fields.map((f) => ({
           name: f.name,
-          parsed: f.getParsed(),
-          serialized: f.getSerialized(),
-          createParsed: f.getCreateParsed(),
-          createSerialized: f.getCreateSerialized(),
-          updateParsed: f.getUpdateParsed(),
-          updateSerialized: f.getUpdateSerialized(),
+          serialized: f.getTypePrinted(),
+          createSerialized: f.getCreatePrinted(),
+          updateSerialized: f.getUpdatePrinted(),
           isFile: f instanceof FileField,
           isMultiple: "mode" in f && f.mode === "multiple",
           isAuto: f instanceof AutoDateTimeField,
-          parser: f.getParser(),
-          serializer: f.getSerializer(),
-          createParser: f.getCreateParser(),
-          createSerializer: f.getCreateSerializer(),
-          updateParser: f.getUpdateParser(),
-          updateSerializer: f.getUpdateSerializer(),
           tsDoc: f.getTsDoc(),
         })),
         includeExpand: fields.some((f) => f instanceof RelationField),
