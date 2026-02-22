@@ -18,13 +18,13 @@ export interface TypedPockedBase extends PocketBase {
   {{/collections}}
 }
 
-type TagType = never
+type _TagType = never
   {{#collections}}
   | "{{name}}"
   {{/collections}}
 ;
 
-type Tag = { type: TagType; id: string };
+type _Tag = { type: _TagType; id: string };
 
 interface Flavoring<FlavorT> {
   _type?: FlavorT;
@@ -175,7 +175,7 @@ export type {{singularUpperCase}}RecordFullListOptions =
   & {{singularUpperCase}}RecordOptions
 ;
 
-function getTagsFor{{singularUpperCase}}(record: {{singularUpperCase}}): Tag[] {
+function getTagsFor{{singularUpperCase}}(record: {{singularUpperCase}}): _Tag[] {
   return ([
     { type: "{{name}}", id: record.id },
     {{#expand}}
