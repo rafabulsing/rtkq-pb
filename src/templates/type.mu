@@ -63,7 +63,7 @@ export type {{singularUpperCase}} = {
   verified: boolean,
   {{/isAuthCollection}}
   {{#includeExpand}}
-  expand: {
+  expand?: {
     {{#expand}}
     {{name}}?: {{singularUpperCase}}{{#isMultiple}}[]{{/isMultiple}};
     {{/expand}}
@@ -343,10 +343,10 @@ export const {{plural}}Api = {
       selectFromResult: (result) => ({
         ...result,
         data: result.data as {{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         },
         currentData: result.currentData as {{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         },
       }),
     });
@@ -360,10 +360,10 @@ export const {{plural}}Api = {
       selectFromResult: (result) => ({
         ...result,
         data: result.data as {{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         },
         currentData: result.currentData as {{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         },
       }),
     });
@@ -379,12 +379,12 @@ export const {{plural}}Api = {
         ...result,
         data: result.data as ListResult<{{singularUpperCase}}> & {
           items: Array<{{singularUpperCase}} & {
-            expand: Resolved{{singularUpperCase}}Expand<T>,
+            expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
         },
         currentData: result.currentData as ListResult<{{singularUpperCase}}> & {
           items: Array<{{singularUpperCase}} & {
-            expand: Resolved{{singularUpperCase}}Expand<T>,
+            expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
         },
       }),
@@ -400,12 +400,12 @@ export const {{plural}}Api = {
         ...result,
         data: result.data as ListResult<{{singularUpperCase}}> & {
           items: Array<{{singularUpperCase}} & {
-            expand: Resolved{{singularUpperCase}}Expand<T>,
+            expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
         },
         currentData: result.currentData as ListResult<{{singularUpperCase}}> & {
           items: Array<{{singularUpperCase}} & {
-            expand: Resolved{{singularUpperCase}}Expand<T>,
+            expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
         },
       }),
@@ -421,10 +421,10 @@ export const {{plural}}Api = {
       selectFromResult: (result) => ({
         ...result,
         data: result.data as Array<{{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         }>,
         currentData: result.currentData as Array<{{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         }>,
       }),
     });
@@ -438,10 +438,10 @@ export const {{plural}}Api = {
       selectFromResult: (result) => ({
         ...result,
         data: result.data as Array<{{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         }>,
         currentData: result.currentData as Array<{{singularUpperCase}} & {
-          expand: Resolved{{singularUpperCase}}Expand<T>,
+          expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
         }>,
       }),
     });
