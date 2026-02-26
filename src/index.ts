@@ -538,6 +538,7 @@ export function schemaToTypes(collections: DbCollection[], options: ConfigOption
                 resolvedToCollection: resolvedTo.name,
                 collection: c.name,
                 isMultiple: f.maxSelect > 1,
+                isRequired: f.minSelect > 0 || f.required,
               };
             })
           ,
@@ -557,6 +558,7 @@ export function schemaToTypes(collections: DbCollection[], options: ConfigOption
                 resolvedToCollection: br.col.name,
                 collection: br.col,
                 isMultiple: true,
+                isRequired: false,
               };
             })
           ,

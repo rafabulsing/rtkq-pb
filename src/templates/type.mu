@@ -130,7 +130,7 @@ export type {{singularUpperCase}}Expand = {
 
 export type Resolved{{singularUpperCase}}Expand<T extends {{singularUpperCase}}Expand> = {
   {{#expand}}
-  {{name}}: undefined extends T["{{name}}"]
+  {{name}}{{^isRequired}}?{{/isRequired}}: undefined extends T["{{name}}"]
     ? never
     : {{#isMultiple}}({{singularUpperCase}} & { expand: Resolved{{singularUpperCase}}Expand<NonNullable<T["{{name}}"]>> })[]{{/isMultiple}}{{^isMultiple}}{{singularUpperCase}} & { expand: Resolved{{singularUpperCase}}Expand<NonNullable<T["{{name}}"]>> }{{/isMultiple}}
   ;
