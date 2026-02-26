@@ -142,6 +142,7 @@ export type Resolved{{singularUpperCase}}Expand<T extends {{singularUpperCase}}E
 
 export type {{singularUpperCase}}CommonOptions = {
   fields?: Array<"id"|{{#fields}}"{{name}}"|{{/fields}}"created"|"updated">;
+  tags?: Array<{ type: _TagType, id?: string }>;
 };
 
 export type {{singularUpperCase}}ListOptions = {{singularUpperCase}}CommonOptions & {
@@ -210,8 +211,8 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       providesTags: (result, error, args) => !result
-        ? ["{{name}}"]
-        : getTagsFor{{singularUpperCase}}(result)
+        ? ["{{name}}", ...((typeof args === "object" && args.tags) || [])]
+        : [...getTagsFor{{singularUpperCase}}(result), ...((typeof args === "object" && args.tags) || [])]
       ,
     }),
 
@@ -235,10 +236,11 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       providesTags: (result, error, args) => !result
-        ? ["{{name}}"]
+        ? ["{{name}}", ...(args?.tags ?? [])]
         : [
           { type: "{{name}}", id: "LIST-{{plural}}" },
           ...result.items.map((record) => getTagsFor{{singularUpperCase}}(record)).flat(),
+          ...(args?.tags ?? [])
         ]
       ,
     }),
@@ -259,10 +261,11 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       providesTags: (result, error, args) => !result
-        ? ["{{name}}"]
+        ? ["{{name}}", ...(args?.tags ?? [])]
         : [
           { type: "{{name}}", id: "LIST-{{plural}}" },
           ...result.map((record) => getTagsFor{{singularUpperCase}}(record)).flat(),
+          ...(args?.tags ?? [])
         ]
       ,
     }),
@@ -282,8 +285,8 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
         }
       },
       invalidatesTags: (result, error, args) => !result
-        ? ["{{name}}"]
-        : [{ type: "{{name}}", id: "LIST-{{plural}}" }]
+        ? ["{{name}}", ...(args.tags ?? [])]
+        : [{ type: "{{name}}", id: "LIST-{{plural}}" }, ...(args.tags ?? [])]
       ,
     }),
 
@@ -303,6 +306,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
       },
       invalidatesTags: (result, error, args) => [
         { type: "{{name}}", id: args.record.id },
+        ...(args.tags ?? [])
       ],
     }),
 
@@ -322,6 +326,7 @@ export const {{plural}}ApiInternal = api.injectEndpoints({
       },
       invalidatesTags: (result, error, args) => [
         { type: "{{name}}", id: typeof args === "string" ? args : args.id },
+        ...((typeof args === "object" && args.tags) || [])
       ],
     }),
   }),
