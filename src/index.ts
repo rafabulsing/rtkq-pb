@@ -517,29 +517,59 @@ export function schemaToTypes(collections: DbCollection[], options: ConfigOption
           isAuto: f instanceof AutoDateTimeField,
           tsDoc: f.getTsDoc(),
         })),
-        includeExpand: fields.some((f) => f instanceof RelationField),
-        expand: fields
-          .filter((f) => f instanceof RelationField)
-          .map((f) => {
-            const resolvedTo = collections.find((c) => c.id === f.collectionId);
+        includeExpand: fields.some((f) => f instanceof RelationField) || collections.some((col) => col.fields.some((f) => {
+          const parsed = parseField(f);
+          return parsed instanceof RelationField && parsed.collectionId === c.id
+        })),
+        expand: [
+          // Direct relations
+          ...fields
+            .filter((f) => f instanceof RelationField)
+            .map((f) => {
+              const resolvedTo = collections.find((c) => c.id === f.collectionId);
 
-            if (!resolvedTo) {
-              throw new Error(`Collection ${c.name}: RelationField ${f.name} references non-existant collection "${f.collectionId}"`);
-            }
+              if (!resolvedTo) {
+                throw new Error(`Collection ${c.name}: RelationField ${f.name} references non-existant collection "${f.collectionId}"`);
+              }
 
-            return {
-              name: f.name,
-              singularUpperCase: upperCaseFirstChar(resolvedTo.config.singular),
-              resolvedToCollection: resolvedTo.name,
-              collection: c.name,
-              isMultiple: f.maxSelect > 1,
-            };
-          })
-        ,
+              return {
+                name: f.name,
+                singularUpperCase: upperCaseFirstChar(resolvedTo.config.singular),
+                resolvedToCollection: resolvedTo.name,
+                collection: c.name,
+                isMultiple: f.maxSelect > 1,
+              };
+            })
+          ,
+          // Back relations
+          ...collections
+            .map((col) => col.fields
+              .map(parseField)
+              .filter((f) => f instanceof RelationField)
+              .filter((f) => f.collectionId === c.id)
+              .map((f) => ({ col, f }))
+            )
+            .flat()
+            .map((br) => {
+              return {
+                name: `${br.col.name}_via_${br.f.name}`,
+                singularUpperCase: upperCaseFirstChar(br.col.config.singular),
+                resolvedToCollection: br.col.name,
+                collection: br.col,
+                isMultiple: true,
+              };
+            })
+          ,
+        ],
       };
     }),
     options,
   });
+}
+
+function logAndReturn<T>(arg: T): T {
+  console.log(arg);
+  return arg;
 }
 
 function upperCaseFirstChar(str: string): string {
