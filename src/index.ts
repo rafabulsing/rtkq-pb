@@ -23,7 +23,7 @@ abstract class Field {
   }
 
   getCreatePrinted(): string|null {
-    return `${this.name}: ${this.getUpdateType()};`;
+    return `${this.name}: ${this.getCreateType()};`;
   }
 
   getUpdatePrinted(): string|null {
@@ -203,6 +203,15 @@ class PlainTextField extends Field {
     }
     return null;
   }
+  getCreateType(): string {
+    if (this.required) {
+      return "string";
+    }
+    return "string|undefined";
+  }
+    getCreatePrinted(): string | null {
+    return `${this.name}${this.required ? "" : "?"}: ${this.getCreateType()}`;
+  }
 }
 
 abstract class SpecialTextField extends Field {
@@ -225,6 +234,17 @@ abstract class SpecialTextField extends Field {
 
   getTsDoc(): string | null {
     return null;
+  }
+
+  getCreateType(): string {
+    if (this.required) {
+      return "string";
+    }
+    return "string|undefined";
+  }
+
+  getCreatePrinted(): string | null {
+    return `${this.name}${this.required ? "" : "?"}: ${this.getCreateType()}`;
   }
 }
 
@@ -304,6 +324,14 @@ class RelationField extends Field {
       : "string[]"
     ;
   }
+
+  getCreateType(): string {
+    return this.getType() + (this.required ? "" : "|undefined");
+  }
+
+  getCreatePrinted(): string | null {
+    return `${this.name}${this.required ? "" : "?"}: ${this.getCreateType()}`;
+  }
 }
 
 class DateTimeField extends Field {
@@ -322,6 +350,14 @@ class DateTimeField extends Field {
 
   getType(): string {
     return "string";
+  }
+
+  getCreateType(): string {
+    return this.getType() + (this.required ? "" : "|undefined");
+  }
+
+  getCreatePrinted(): string | null {
+    return `${this.name}${this.required ? "" : "?"}: ${this.getCreateType()}`;
   }
 }
 
@@ -369,6 +405,7 @@ class SelectField extends Field {
   static readonly type = "select";
   values: string[];
   maxSelect: number;
+  required: boolean;
 
   constructor(field: UnknownField) {
     super(field);
@@ -397,9 +434,14 @@ class SelectField extends Field {
     if (!this.hasNumberProperty(field, "maxSelect")) {
       assert(false);
     }
+    
+    if (!this.hasBooleanProperty<"required">(field, "required")) {
+      assert(false);
+    }
 
     this.values = field.values;
     this.maxSelect = field.maxSelect;
+    this.required = field.required;
   }
 
   getType(): string {
@@ -410,11 +452,20 @@ class SelectField extends Field {
       : `Array<${valuesType}>`
     ;
   }
+
+  getCreateType(): string {
+    return this.getType() + (this.required ? "" : "|undefined");
+  }
+
+  getCreatePrinted(): string | null {
+    return `${this.name}${this.required ? "" : "?"}: ${this.getCreateType()}`;
+  }
 }
 
 class FileField extends Field {
   static readonly type = "file";
   maxSelect: number;
+  required: boolean;
 
   constructor(field: UnknownField) {
     super(field);
@@ -422,8 +473,13 @@ class FileField extends Field {
     if (!this.hasNumberProperty(field, "maxSelect")) {
       assert(false);
     }
+    
+    if (!this.hasBooleanProperty<"required">(field, "required")) {
+      assert(false);
+    }
 
     this.maxSelect = field.maxSelect;
+    this.required = field.required;
   }
 
   getType(): string {
@@ -434,10 +490,7 @@ class FileField extends Field {
   }
 
   getCreateType(): string {
-    return this.maxSelect === 1
-      ? "File"
-      : "File[]"
-    ;
+    return this.getType() + (this.required ? "" : "|undefined");
   }
 
   getUpdateType(): string {
