@@ -344,10 +344,10 @@ export const {{plural}}Api = {
         ...result,
         data: result.data as {{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        },
+        }|undefined,
         currentData: result.currentData as {{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        },
+        }|undefined,
       }),
     });
   },
@@ -361,10 +361,10 @@ export const {{plural}}Api = {
         ...result,
         data: result.data as {{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        },
+        }|undefined,
         currentData: result.currentData as {{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        },
+        }|undefined,
       }),
     });
   },
@@ -381,12 +381,12 @@ export const {{plural}}Api = {
           items: Array<{{singularUpperCase}} & {
             expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
-        },
+        }|undefined,
         currentData: result.currentData as ListResult<{{singularUpperCase}}> & {
           items: Array<{{singularUpperCase}} & {
             expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
-        },
+        }|undefined,
       }),
     });
   },
@@ -402,12 +402,12 @@ export const {{plural}}Api = {
           items: Array<{{singularUpperCase}} & {
             expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
-        },
+        }|undefined,
         currentData: result.currentData as ListResult<{{singularUpperCase}}> & {
           items: Array<{{singularUpperCase}} & {
             expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
           }>,
-        },
+        }|undefined,
       }),
     });
   },
@@ -422,10 +422,10 @@ export const {{plural}}Api = {
         ...result,
         data: result.data as Array<{{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        }>,
+        }>|undefined,
         currentData: result.currentData as Array<{{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        }>,
+        }>|undefined,
       }),
     });
   },
@@ -439,10 +439,10 @@ export const {{plural}}Api = {
         ...result,
         data: result.data as Array<{{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        }>,
+        }>|undefined,
         currentData: result.currentData as Array<{{singularUpperCase}} & {
           expand: keyof T extends never ? undefined : Resolved{{singularUpperCase}}Expand<T>,
-        }>,
+        }>|undefined,
       }),
     });
   },
@@ -454,7 +454,7 @@ export const {{plural}}Api = {
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data as {{singularUpperCase}},
+        data: result.data as {{singularUpperCase}}|undefined,
       }),
     });
   },
@@ -466,7 +466,7 @@ export const {{plural}}Api = {
       ...options,
       selectFromResult: (result) => ({
         ...result,
-        data: result.data as {{singularUpperCase}},
+        data: result.data as {{singularUpperCase}}|undefined,
       }),
     });
   },
