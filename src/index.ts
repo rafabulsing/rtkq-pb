@@ -653,10 +653,10 @@ export function dbToTypes(dbPath: string, outputPath: string, configPath: string
       ,
       // Get names from config, otherwise infer them if options allow it
       config: config.collections[c.name]
-        ?? !config.options.inferRecordNames ? undefined : {
-        singular: c.name.slice(0, -1),
-        plural: c.name,
-      },
+        ?? (!config.options.inferRecordNames ? undefined : {
+          singular: c.name.slice(0, -1),
+          plural: c.name,
+        }),
     }))
   ;
 

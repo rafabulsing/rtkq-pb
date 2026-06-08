@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prepare": "tsc && node -e \"require('fs').cpSync('src/templates','dist/templates',{recursive:true})\"",
     "build": "run-script-os",
     "build:windows": "powershell scripts\\build.ps1",
     "build:unix": "./scripts/build.sh",
